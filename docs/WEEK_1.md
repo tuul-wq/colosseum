@@ -4,7 +4,7 @@ Goal: make bots fight in a deterministic arena.
 
 Tasks:
 
-- [ ] Create Cargo workspace
+- [x] Create Cargo workspace
 - [ ] Add core domain types:
   - [ ] `BotId`
   - [ ] `MatchId`

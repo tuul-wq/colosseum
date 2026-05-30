@@ -1,5 +1,5 @@
 [package]
-name = "api-server"
+name = "heroes"
 version.workspace = true
 edition.workspace = true
 

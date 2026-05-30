@@ -1,10 +1,10 @@
 [workspace]
 resolver = "3"
 members = [
-    "crates/domain",
-    "crates/bots",
     "apps/cli",
-    "apps/api-server",
+    "crates/combat",
+    "crates/domain",
+    "crates/heroes"
 ]
 
 [workspace.package]
