@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::{Hero, Position, Stats, Weapon};
+use crate::{Health, Hero, Position, Stats, Weapon};
 
 pub type WarriorHero = Hero<Warrior>;
 
@@ -16,7 +16,10 @@ impl WarriorHero {
             id: Uuid::new_v4(),
             stats: Stats {
                 name,
-                health: 100,
+                health: Health {
+                    max: 100,
+                    current: 100,
+                },
                 alive: true,
                 initiative: 10,
                 speed: 2,

@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::{Hero, Position, Stats, Weapon};
+use crate::{Health, Hero, Position, Stats, Weapon};
 
 pub type MageHero = Hero<Mage>;
 
@@ -16,7 +16,10 @@ impl MageHero {
             id: Uuid::new_v4(),
             stats: Stats {
                 name,
-                health: 60,
+                health: Health {
+                    max: 60,
+                    current: 60,
+                },
                 alive: true,
                 initiative: 12,
                 speed: 2,

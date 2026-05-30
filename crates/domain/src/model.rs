@@ -1,3 +1,5 @@
+use std::str;
+
 use uuid::Uuid;
 
 pub type HeroID = Uuid;
@@ -16,13 +18,21 @@ pub struct Stats {
     /// The name of the hero.
     pub name: String,
     /// The health of the hero, in hit points.
-    pub health: u16,
+    pub health: Health,
     /// Whether the hero is alive or not.
     pub alive: bool,
     /// The initiative of the hero, determines turn order.
     pub initiative: u8,
     /// The speed of the hero, in cells per turn.
     pub speed: u8,
+}
+
+#[derive(Debug)]
+pub struct Health {
+    /// The maximum health of the hero, in hit points.
+    pub max: u16,
+    /// The current health of the hero, in hit points.
+    pub current: u16,
 }
 
 #[derive(Debug)]
