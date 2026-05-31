@@ -1,17 +1,20 @@
 use uuid::Uuid;
 
-use crate::{Health, Hero, Position, Stats, Weapon};
-
-pub type WarriorHero = Hero<Warrior>;
+use crate::{Health, Hero, Position, Stats, Weapon, class::HeroClass};
 
 #[derive(Debug)]
-pub struct Warrior {
-    /// Rage to cast spells.
-    pub rage: u8,
+pub struct WarriorClass {
+    /// Rage to cast abilities.
+    pub rage: Rage,
 }
 
-impl WarriorHero {
-    pub fn new(name: String, position: Position) -> Self {
+pub struct Rage {
+    max: u8,
+    current: u8,
+}
+
+impl Hero {
+    pub fn warrior(name: String, position: Position) -> Self {
         Self {
             id: Uuid::new_v4(),
             stats: Stats {
@@ -24,7 +27,12 @@ impl WarriorHero {
                 initiative: 10,
                 speed: 2,
             },
-            class: Warrior { rage: 100 },
+            class: HeroClass::Warrior(WarriorClass {
+                rage: Rage {
+                    max: 100,
+                    current: 0,
+                },
+            }),
             weapon: Weapon {
                 damage: 10,
                 range: 1,

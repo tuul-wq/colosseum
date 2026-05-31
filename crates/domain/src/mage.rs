@@ -1,17 +1,20 @@
 use uuid::Uuid;
 
-use crate::{Health, Hero, Position, Stats, Weapon};
-
-pub type MageHero = Hero<Mage>;
+use crate::{Health, Hero, Position, Stats, Weapon, class::HeroClass};
 
 #[derive(Debug)]
-pub struct Mage {
-    /// Mana points to cast spells.
-    pub mana: u8,
+pub struct MageClass {
+    /// Mana points to cast abilities.
+    pub mana: Mana,
 }
 
-impl MageHero {
-    pub fn new(name: String, position: Position) -> Self {
+pub struct Mana {
+    max: u8,
+    current: u8,
+}
+
+impl Hero {
+    pub fn mage(name: String, position: Position) -> Self {
         Self {
             id: Uuid::new_v4(),
             stats: Stats {
@@ -24,7 +27,12 @@ impl MageHero {
                 initiative: 12,
                 speed: 2,
             },
-            class: Mage { mana: 100 },
+            class: HeroClass::Mage(MageClass {
+                mana: Mana {
+                    max: 100,
+                    current: 100,
+                },
+            }),
             weapon: Weapon {
                 damage: 5,
                 range: 3,

@@ -1,14 +1,14 @@
-use std::str;
-
 use uuid::Uuid;
+
+use crate::class::HeroClass;
 
 pub type HeroID = Uuid;
 
 #[derive(Debug)]
-pub struct Hero<C> {
+pub struct Hero {
     pub id: HeroID,
     pub stats: Stats,
-    pub class: C,
+    pub class: HeroClass,
     pub weapon: Weapon,
     pub position: Position,
 }
