@@ -8,9 +8,10 @@ pub struct MageClass {
     pub mana: Mana,
 }
 
+#[derive(Debug)]
 pub struct Mana {
-    max: u8,
-    current: u8,
+    pub max: u8,
+    pub current: u8,
 }
 
 impl Hero {

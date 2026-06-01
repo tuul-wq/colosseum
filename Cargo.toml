@@ -4,7 +4,7 @@ members = [
     "apps/cli",
     "crates/combat",
     "crates/domain",
-    "crates/heroes"
+    "crates/map",
 ]
 
 [workspace.package]
