@@ -15,7 +15,7 @@ pub struct Rage {
 }
 
 impl Hero {
-    pub fn warrior(name: String, position: Position) -> Self {
+    pub fn warrior(name: String) -> Self {
         Self {
             id: Uuid::new_v4(),
             stats: Stats {
@@ -37,7 +37,7 @@ impl Hero {
                 damage: 10,
                 range: 1,
             },
-            position,
+            position: Position::new(0, 0),
         }
     }
 }

@@ -15,7 +15,7 @@ pub struct Mana {
 }
 
 impl Hero {
-    pub fn mage(name: String, position: Position) -> Self {
+    pub fn mage(name: String) -> Self {
         Self {
             id: Uuid::new_v4(),
             stats: Stats {
@@ -37,7 +37,7 @@ impl Hero {
                 damage: 5,
                 range: 3,
             },
-            position,
+            position: Position::new(0, 0),
         }
     }
 }

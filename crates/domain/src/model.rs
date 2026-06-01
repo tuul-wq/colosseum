@@ -60,15 +60,52 @@ impl Hero {
         self.position = position;
     }
 
-    pub fn attack(&self, target: &mut Hero) {
-        target.take_damage(self.weapon.damage);
-    }
-
     pub fn take_damage(&mut self, damage: u8) {
         self.stats.health.current = self.stats.health.current.saturating_sub(damage);
     }
 
     pub fn is_alive(&self) -> bool {
         self.stats.health.current > 0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn hero_moves_to_position() {
+        let mut hero = Hero::warrior("Warrior".to_string());
+
+        hero.move_to(Position::new(2, 3));
+
+        assert_eq!(hero.position.x, 2);
+        assert_eq!(hero.position.y, 3);
+    }
+
+    #[test]
+    fn hero_takes_damage() {
+        let mut hero = Hero::warrior("Warrior".to_string());
+
+        hero.take_damage(25);
+        assert_eq!(hero.stats.health.current, 75);
+
+        hero.take_damage(95);
+        assert_eq!(hero.stats.health.current, 0);
+    }
+
+    #[test]
+    fn hero_is_alive_when_health_is_above_zero() {
+        let hero = Hero::warrior("Warrior".to_string());
+
+        assert!(hero.is_alive());
+    }
+
+    #[test]
+    fn hero_is_not_alive_when_health_is_zero() {
+        let mut hero = Hero::warrior("Warrior".to_string());
+
+        hero.take_damage(100);
+        assert!(!hero.is_alive());
     }
 }
