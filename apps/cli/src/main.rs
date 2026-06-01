@@ -1,6 +1,6 @@
 use arguments::{Cli, Commands};
 use clap::Parser;
-use domain::{Hero, Position};
+use domain::Hero;
 
 mod arguments;
 

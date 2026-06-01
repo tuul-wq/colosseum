@@ -5,7 +5,7 @@ members = [
     "crates/arena",
     "crates/controller",
     "crates/domain",
-    "crates/map",
+    "crates/world",
 ]
 
 [workspace.package]

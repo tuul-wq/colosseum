@@ -1,14 +1,7 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub mod hero_ai;
+pub mod mage_ai;
+pub mod warrior_ai;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use hero_ai::*;
+pub use mage_ai::*;
+pub use warrior_ai::*;

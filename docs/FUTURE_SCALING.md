@@ -122,8 +122,8 @@ They describe how the product can grow.
 - [ ] Add pickups
 - [ ] Add objectives
 - [ ] Add fog of war
-- [ ] Add different maps
-- [ ] Add map generator
+- [ ] Add different worlds
+- [ ] Add world generator
 - [ ] Add hazards
 - [ ] Add bot vision range
 - [ ] Add multiple game modes:
