@@ -24,7 +24,6 @@ impl Hero {
                     max: 60,
                     current: 60,
                 },
-                alive: true,
                 initiative: 12,
                 speed: 2,
             },
