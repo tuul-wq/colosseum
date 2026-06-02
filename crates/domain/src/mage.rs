@@ -1,10 +1,17 @@
 use uuid::Uuid;
 
-use crate::{Health, Hero, Position, Stats, Weapon, class::HeroClass};
+use crate::{
+    Health, Hero, Position, Stats,
+    class::HeroClass,
+    weapon::{MainHandWeapon, OffHandWeapon, WeaponRangeType},
+};
 
 #[derive(Debug)]
 pub struct MageClass {
-    /// Mana points to cast abilities.
+    /// Mana points used for spell casting.
+    ///
+    /// Mage spells should be modeled as class abilities that spend mana, not as
+    /// the hero's basic weapon attack.
     pub mana: Mana,
 }
 
@@ -33,11 +40,9 @@ impl Hero {
                     current: 100,
                 },
             }),
-            weapon: Weapon {
-                damage: 5,
-                range: 3,
-            },
             position: Position::new(0, 0),
+            main_weapon: MainHandWeapon::new(5, WeaponRangeType::Ranged(2)),
+            offhand_weapon: OffHandWeapon::new(1, WeaponRangeType::Melee),
         }
     }
 }

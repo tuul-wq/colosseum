@@ -1,16 +1,26 @@
 use uuid::Uuid;
 
-use crate::class::HeroClass;
+use crate::{
+    class::HeroClass,
+    weapon::{MainHandWeapon, OffHandWeapon},
+};
 
 pub type HeroID = Uuid;
 
 #[derive(Debug)]
 pub struct Hero {
+    /// Stable identity used by world cells, targeting, and event records.
     pub id: HeroID,
+    /// Shared combat stats that apply to every hero class.
     pub stats: Stats,
+    /// Class-specific resources and abilities, such as mage mana or warrior rage.
     pub class: HeroClass,
-    pub weapon: Weapon,
+    /// Current grid position in the arena.
     pub position: Position,
+    /// The hero's main basic attack
+    pub main_weapon: MainHandWeapon,
+    /// This is the fallback option every hero can use
+    pub offhand_weapon: OffHandWeapon,
 }
 
 #[derive(Debug)]
@@ -31,14 +41,6 @@ pub struct Health {
     pub max: u8,
     /// The current health of the hero, in hit points.
     pub current: u8,
-}
-
-#[derive(Debug)]
-pub struct Weapon {
-    /// The damage of the weapon, in hit points.
-    pub damage: u8,
-    /// The range of the weapon, in cells.
-    pub range: u8,
 }
 
 #[derive(Debug)]

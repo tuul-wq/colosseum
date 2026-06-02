@@ -1,10 +1,14 @@
 use uuid::Uuid;
 
-use crate::{Health, Hero, Position, Stats, Weapon, class::HeroClass};
+use crate::{
+    Health, Hero, Position, Stats,
+    class::HeroClass,
+    weapon::{MainHandWeapon, OffHandWeapon, WeaponRangeType},
+};
 
 #[derive(Debug)]
 pub struct WarriorClass {
-    /// Rage to cast abilities.
+    /// Rage used for future special melee abilities.
     pub rage: Rage,
 }
 
@@ -33,11 +37,9 @@ impl Hero {
                     current: 0,
                 },
             }),
-            weapon: Weapon {
-                damage: 10,
-                range: 1,
-            },
             position: Position::new(0, 0),
+            main_weapon: MainHandWeapon::new(10, WeaponRangeType::Melee),
+            offhand_weapon: OffHandWeapon::new(3, WeaponRangeType::Melee),
         }
     }
 }
