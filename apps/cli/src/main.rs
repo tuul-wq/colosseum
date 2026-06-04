@@ -1,6 +1,6 @@
 use arguments::{Cli, Commands};
 use clap::Parser;
-use domain::Hero;
+use domain::{Hero, Position};
 
 mod arguments;
 
@@ -11,8 +11,8 @@ fn main() {
         Commands::Fight => println!("Fight!"),
     }
 
-    let mage = Hero::mage("Mage_1".to_owned());
-    let warrior = Hero::warrior("Warrior_1".to_owned());
+    let mage = Hero::mage("Mage_1".into(), Position::Backline);
+    let warrior = Hero::warrior("Warrior_1".into(), Position::Frontline);
 
     let heroes = vec![mage, warrior];
 

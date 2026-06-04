@@ -1,4 +1,4 @@
-use domain::{HeroID, Position};
+use domain::{HeroId, Position};
 
 pub struct World {
     /// The world data, stored as a flat vector of cells.
@@ -11,7 +11,7 @@ pub struct World {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Cell {
-    Player(HeroID),
+    Player(HeroId),
     Blocked,
     Empty,
 }

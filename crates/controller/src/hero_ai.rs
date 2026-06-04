@@ -1,4 +1,4 @@
-use domain::{Hero, HeroID, Position};
+use domain::{Hero, HeroId, Position};
 use world::World;
 
 pub struct DesicionContext<'a> {
@@ -24,32 +24,21 @@ pub struct TurnPlan {
     pub secondary: SecondaryAction,
 }
 
-pub enum Action {
-    /// Basic weapon attack against a target hero.
-    Attack(HeroID),
-    /// Class spell or special ability against a target hero.
-    Spell(HeroID),
-    /// Move to a target arena position.
-    Move(Position),
-    /// Skip turn
-    Skip,
-}
-
 pub enum MainAction {
-    /// Basic weapon attack. Range is defined by the actor's weapon.
-    Attack(HeroID),
-    /// Class spell or special ability.
-    ///
-    /// Spell definitions should decide whether the spell is ranged,
-    /// melee-safe, self-targeted, or otherwise usable while engaged.
-    Spell(HeroID),
+    /// Basic weapon attack against a target hero.
+    Attack(HeroId),
+    /// Use special ability.
+    Ability(HeroId),
+    /// Disengage from adjacent enemies, enables move afterwards.
+    Disengage,
+    /// Skip action
     Skip,
 }
 
 pub enum SecondaryAction {
-    /// Move to a target arena position, subject to speed, collision, and
-    /// engagement rules.
+    /// Move to a target arena position. If engaged must Disengage first.
     MoveTo(Position),
+    /// Skip action
     Skip,
 }
 
