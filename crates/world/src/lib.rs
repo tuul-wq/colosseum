@@ -1,3 +1,6 @@
+pub mod errors;
+pub mod formation;
 pub mod world;
 
-pub use world::{Cell, World};
+pub use errors::WorldError;
+pub use world::World;

@@ -1,6 +1,4 @@
-use std::error::Error;
-
-use domain::{Hero, HeroClass};
+use domain::Hero;
 
 use crate::{DesicionContext, HeroAI, MainAction, SecondaryAction, TurnPlan};
 

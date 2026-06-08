@@ -5,3 +5,4 @@ edition.workspace = true
 
 [dependencies]
 uuid = { version = "1.23.2", features = ["v4"] }
+thiserror.workspace = true

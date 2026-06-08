@@ -2,10 +2,10 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::{Health, Hero, Position, Stats};
+use crate::{Health, Hero, Stats};
 
 impl Hero {
-    pub fn warrior(name: String, position: Position) -> Self {
+    pub fn warrior(name: String) -> Self {
         Self {
             id: Uuid::new_v4(),
             stats: Stats {
@@ -18,7 +18,6 @@ impl Hero {
                 speed: 2,
             },
             abilities: HashMap::new(),
-            position,
         }
     }
 }
