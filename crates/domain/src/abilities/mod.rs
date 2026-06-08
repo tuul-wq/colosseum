@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+pub mod general;
 pub mod mage;
 pub mod warrior;
 
@@ -17,11 +18,15 @@ pub struct Ability {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AbilityId {
-    /// Mage
+    // General
+    MainAttack,
+    OffhandAttack,
+
+    // Mage
     Fireball,
     ArcaneExplosion,
 
-    /// Warrior
+    // Warrior
     Slam,
     Whirlwind,
 }
@@ -38,6 +43,7 @@ pub enum AbilityTarget {
 pub enum AbilityEffect {
     Damage(u8),
     Heal(u8),
+    DamageReduction { amount: u8, duration_turns: u8 },
     // Buff,
     // Debuff,
 }
