@@ -3,4 +3,4 @@ pub mod formation;
 pub mod world;
 
 pub use errors::WorldError;
-pub use world::World;
+pub use world::{Side, World};

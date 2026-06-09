@@ -16,6 +16,10 @@ impl Formation {
         }
     }
 
+    pub fn all_heroes(&self) -> Vec<HeroId> {
+        self.slots.values().filter_map(|el| *el).collect()
+    }
+
     pub fn position_of(&self, hero_id: HeroId) -> Option<Position> {
         self.slots
             .iter()

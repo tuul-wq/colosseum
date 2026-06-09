@@ -1,4 +1,4 @@
-// pub mod hero_ai;
+pub mod hero_ai;
 // pub mod mage_ai;
 // pub mod warrior_ai;
 

@@ -20,6 +20,8 @@ impl Hero {
                 speed: 2,
             },
             abilities: HashMap::from([
+                (AbilityId::MainAttack, mage::mage_main_attack(6)),
+                (AbilityId::OffhandAttack, mage::mage_offhand_attack(3)),
                 (AbilityId::Fireball, mage::fireball()),
                 (AbilityId::ArcaneExplosion, mage::arcane_explosion()),
             ]),

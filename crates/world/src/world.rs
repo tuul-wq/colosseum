@@ -36,6 +36,10 @@ impl World {
         }
     }
 
+    pub fn all_heroes(&self, side: Side) -> Vec<HeroId> {
+        self.formation(side).all_heroes()
+    }
+
     pub fn position_of(&self, side: Side, hero_id: HeroId) -> Option<Position> {
         self.formation(side).position_of(hero_id)
     }

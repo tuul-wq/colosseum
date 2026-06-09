@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::{Health, Hero, Stats};
+use crate::abilities::warrior;
+use crate::{AbilityId, Health, Hero, Stats};
 
 impl Hero {
     pub fn warrior(name: String) -> Self {
@@ -17,7 +18,12 @@ impl Hero {
                 initiative: 10,
                 speed: 2,
             },
-            abilities: HashMap::new(),
+            abilities: HashMap::from([
+                (AbilityId::MainAttack, warrior::warrior_main_attack(8)),
+                (AbilityId::OffhandAttack, warrior::warrior_offhand_attack(4)),
+                (AbilityId::Slam, warrior::slam()),
+                (AbilityId::Whirlwind, warrior::whirlwind()),
+            ]),
         }
     }
 }
