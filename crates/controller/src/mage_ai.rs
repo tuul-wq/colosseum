@@ -1,36 +1,13 @@
-use domain::Hero;
+use domain::{Hero, heroes::class::HeroClass};
 
-use crate::{DesicionContext, HeroAI, MainAction, SecondaryAction, TurnPlan};
+use crate::hero_ai::{DecisionContext, HeroAi, TurnAction};
 
 pub struct MageAI;
 
-impl HeroAI for MageAI {
+impl HeroAi for MageAI {
     fn supports(&self, hero: &Hero) -> bool {
-        matches!(hero.class, HeroClass::Mage(_))
+        matches!(hero.class, HeroClass::Mage)
     }
 
-    // - try avoid melee contact
-    // - if low hp, avoid melee contact even more
-    //
-    // - use spell when enough mana
-    // - if any target will die from spell, then move and cast
-    // - use attack for nearest target
-    fn decide_turn(&self, ctx: &DesicionContext) -> TurnPlan {
-        // if !self.supports(ctx.actor) {
-        //     println!(
-        //         "MageAI does not support decide_turn for {:?}",
-        //         ctx.actor.class
-        //     );
-
-        //     return TurnPlan {
-        //         main: MainAction::Skip,
-        //         secondary: SecondaryAction::Skip,
-        //     };
-        // }
-
-        // TurnPlan {
-        //     main: MainAction::Skip,
-        //     secondary: SecondaryAction::Skip,
-        // }
-    }
+    fn decide_turn(&self, ctx: &DecisionContext) -> TurnAction {}
 }

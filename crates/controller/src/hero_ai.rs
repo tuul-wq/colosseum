@@ -3,14 +3,14 @@ use std::collections::HashMap;
 use domain::{Hero, HeroId};
 use world::{Side, World};
 
-pub struct DesicionContext<'a> {
+pub struct DecisionContext<'a> {
     pub actor: &'a Hero,
-    pub world: &'a World, // already contains formations
+    pub world: &'a World,
     pub side: Side,
     pub targets: HashMap<HeroId, &'a Hero>,
 }
 
-impl DesicionContext<'_> {
+impl DecisionContext<'_> {
     pub fn get_allies(&self, side: Side) -> HashMap<HeroId, &Hero> {
         self.world
             .all_heroes(side)
@@ -40,8 +40,8 @@ pub enum TurnAction {
     Bandage,
 }
 
-pub trait HeroAI {
+pub trait HeroAi {
     fn supports(&self, hero: &Hero) -> bool;
 
-    fn decide_turn(&self, ctx: &DesicionContext) -> TurnAction;
+    fn decide_turn(&self, ctx: &DecisionContext) -> TurnAction;
 }
