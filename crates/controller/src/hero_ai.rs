@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use domain::{Hero, HeroId, Position};
+use domain::{Hero, HeroId};
 use world::{Side, World};
 
 pub struct DesicionContext<'a> {
@@ -11,21 +11,17 @@ pub struct DesicionContext<'a> {
 }
 
 impl DesicionContext<'_> {
-    pub fn get_allies(&self) -> HashMap<HeroId, &Hero> {
-        let mut allies = HashMap::new();
-
-        for id in self.world.all_heroes(self.side) {
-            if let Some(&hero) = self.targets.get(&id) {
-                allies.insert(id, hero);
-            }
-        }
-
-        allies
+    pub fn get_allies(&self, side: Side) -> HashMap<HeroId, &Hero> {
+        self.world
+            .all_heroes(side)
+            .iter()
+            .filter_map(|id| self.targets.get(id).map(|&hero| (*id, hero)))
+            .collect::<HashMap<_, _>>()
     }
 
     pub fn get_enemies(&self, side: Side) -> HashMap<HeroId, &Hero> {
         self.world
-            .all_heroes(side)
+            .all_heroes(Side::other_side(side))
             .iter()
             .filter_map(|id| self.targets.get(id).map(|&hero| (*id, hero)))
             .collect::<HashMap<_, _>>()

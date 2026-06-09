@@ -14,6 +14,15 @@ pub enum Side {
     Right,
 }
 
+impl Side {
+    pub fn other_side(side: Side) -> Side {
+        match side {
+            Side::Left => Side::Right,
+            Side::Right => Side::Left,
+        }
+    }
+}
+
 impl World {
     pub fn new() -> Self {
         Self {
