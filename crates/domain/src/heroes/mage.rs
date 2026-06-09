@@ -1,15 +1,13 @@
-use std::collections::HashMap;
-
 use uuid::Uuid;
 
-use crate::{AbilityId, Health, Hero, Stats};
-
-use crate::abilities::mage;
+use crate::heroes::class::HeroClass;
+use crate::{Health, Hero, Stats};
 
 impl Hero {
     pub fn mage(name: String) -> Self {
         Self {
             id: Uuid::new_v4(),
+            class: HeroClass::Mage,
             stats: Stats {
                 name,
                 health: Health {
@@ -19,12 +17,6 @@ impl Hero {
                 initiative: 12,
                 speed: 2,
             },
-            abilities: HashMap::from([
-                (AbilityId::MainAttack, mage::mage_main_attack(6)),
-                (AbilityId::OffhandAttack, mage::mage_offhand_attack(3)),
-                (AbilityId::Fireball, mage::fireball()),
-                (AbilityId::ArcaneExplosion, mage::arcane_explosion()),
-            ]),
         }
     }
 }

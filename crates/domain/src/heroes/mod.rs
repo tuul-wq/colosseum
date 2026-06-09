@@ -1,11 +1,10 @@
+pub mod class;
 pub mod mage;
 pub mod warrior;
 
-use std::collections::HashMap;
-
 use uuid::Uuid;
 
-use crate::{Ability, AbilityId};
+use crate::heroes::class::HeroClass;
 
 pub type HeroId = Uuid;
 
@@ -13,7 +12,7 @@ pub type HeroId = Uuid;
 pub struct Hero {
     pub id: HeroId,
     pub stats: Stats,
-    pub abilities: HashMap<AbilityId, Ability>,
+    pub class: HeroClass,
 }
 
 #[derive(Debug)]
