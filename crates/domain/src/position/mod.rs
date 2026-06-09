@@ -5,18 +5,12 @@ pub enum Position {
     Frontline,
     Midline,
     Backline,
-    Rearguard,
 }
 
 impl Position {
-    /// Returns Frontline, Midline, Backline, and Rearguard positions.
+    /// Returns Frontline, Midline, and Backline positions.
     pub fn all() -> HashSet<Self> {
-        HashSet::from([
-            Self::Frontline,
-            Self::Midline,
-            Self::Backline,
-            Self::Rearguard,
-        ])
+        HashSet::from([Self::Frontline, Self::Midline, Self::Backline])
     }
 
     /// Returns Frontline and Midline positions.
@@ -24,13 +18,13 @@ impl Position {
         HashSet::from([Self::Frontline, Self::Midline])
     }
 
-    /// Returns Midline and Backline positions.
+    /// Returns Midline position.
     pub fn mid() -> HashSet<Self> {
-        HashSet::from([Self::Midline, Self::Backline])
+        HashSet::from([Self::Midline])
     }
 
-    /// Returns Backline and Rearguard positions.
+    /// Returns Midline and Backline positions.
     pub fn back() -> HashSet<Self> {
-        HashSet::from([Self::Backline, Self::Rearguard])
+        HashSet::from([Self::Midline, Self::Backline])
     }
 }
