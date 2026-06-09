@@ -1,156 +1,57 @@
 # Colosseum
 
-Deterministic bot arena and tournament engine written in Rust.
+A Rust tactical combat engine where programmable heroes fight in formation-based battles.
 
-Colosseum simulates programmable bots fighting in a grid-based arena, records replayable event logs, runs tournaments in parallel, and exposes match data through a CLI and HTTP API.
+Colosseum is built as a backend/systems project first: domain modeling, turn logic, world state, hero abilities, and AI decision-making are separated into small workspace crates. The goal is to grow it into a deterministic battle simulator with replays, tournaments, and external bot support.
 
-The project is intentionally designed as a backend/systems-focused Rust application rather than a traditional game.
+## Current State
 
----
+- Rust 2024 Cargo workspace
+- Hero domain model with health, stats, UUIDs, and abilities
+- Mage and Warrior hero archetypes
+- Position-based formations: frontline, midline, backline
+- World state for two opposing sides
+- Movement, placement, removal, and ally swapping logic
+- Early `HeroAI` decision interface
+- Starter CLI with a `fight` command
 
-## Why?
+## Roadmap
 
-Most game projects showcase rendering and UI.
+- Complete turn-based combat loop
+- Ability targeting and damage resolution
+- Smarter built-in hero AI
+- Deterministic fight simulation
+- Replayable battle event logs
+- Tournament runner
+- CLI fight output and summaries
+- HTTP API or TUI viewer
+- External bot support
 
-Colosseum focuses on:
-
-* deterministic simulation
-* event-driven architecture
-* CPU-bound parallel workloads
-* async APIs
-* replay systems
-* clean modular design
-* scalability boundaries
-
-The goal is to explore how competitive game infrastructure could be built in Rust.
-
----
-
-## Features
-
-* Deterministic fixed-tick simulation
-* Multiple built-in bots
-* Replay recording and playback
-* Event-based scoring system
-* Parallel tournament execution
-* REST API with Axum
-* Structured logging with tracing
-* Modular Cargo workspace architecture
-
----
-
-## Example
-
-Run a single match:
+## Run
 
 ```bash
-cargo run -p cli -- run \
-  --bots aggressive,random,coward \
-  --seed 42
+cargo run -p cli -- fight
 ```
 
-Run a tournament:
+## Test
 
 ```bash
-cargo run -p cli -- tournament \
-  --bots aggressive,random,coward,sniper \
-  --matches 1000 \
-  --parallelism 4
+cargo test
 ```
-
-Start API server:
-
-```bash
-cargo run -p api-server
-```
-
----
 
 ## Workspace
 
 ```text
-colosseum/
-├── crates/
-│   ├── colosseum-domain/
-│   ├── colosseum-simulation/
-│   ├── colosseum-bots/
-│   ├── colosseum-replay/
-│   ├── colosseum-scoring/
-│   ├── colosseum-tournament/
-│   ├── colosseum-storage/
-│   └── colosseum-api/
-│
-├── apps/
-│   ├── cli/
-│   └── api-server/
+apps/
+  cli/          Command-line interface
+
+crates/
+  domain/      Heroes, stats, abilities, positions
+  world/       Formations and battlefield state
+  controller/  Hero AI and turn decisions
+  arena/       Battle orchestration, in progress
 ```
-
----
-
-## Architecture
-
-Colosseum is built around an event-driven simulation model.
-
-The engine produces immutable events:
-
-```rust
-GameEvent::BotMoved { .. }
-GameEvent::DamageDealt { .. }
-GameEvent::BotKilled { .. }
-```
-
-Replays, scoring, analytics, and debugging are derived from those events.
-
-Simulation logic is isolated from:
-
-* HTTP transport
-* persistence
-* CLI rendering
-* replay storage
-
-This keeps the core deterministic and testable.
-
----
-
-## Bot API
-
-Bots implement a shared trait:
-
-```rust
-pub trait Bot: Send {
-    fn name(&self) -> &str;
-
-    fn decide(&mut self, view: WorldView) -> BotAction;
-}
-```
-
-Current built-in bots:
-
-* RandomBot
-* AggressiveBot
-* CowardBot
-* SniperBot
-
----
 
 ## Tech Stack
 
-* Rust
-* Tokio
-* Axum
-* Rayon
-* Clap
-* Serde
-* Tracing
-
----
-
-## Future Work
-
-* WebSocket spectators
-* PostgreSQL storage
-* external process bots
-* WASM bot sandboxing
-* distributed tournament workers
-* TUI replay viewer
-* cloud deployment
+Rust, Cargo workspaces, Clap, UUID, Thiserror
