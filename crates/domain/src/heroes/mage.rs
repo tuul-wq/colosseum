@@ -1,12 +1,17 @@
-use uuid::Uuid;
+use rand;
 
 use crate::heroes::class::HeroClass;
 use crate::{Health, Hero};
 
+const MAGE_NAMES: [&str; 6] = ["Elowen", "Seraphina", "Mirella", "Isolde", "Lyra", "Amara"];
+
 impl Hero {
-    pub fn mage(name: String) -> Self {
+    pub fn mage() -> Self {
+        let name = MAGE_NAMES[rand::random_range(0..MAGE_NAMES.len())].to_owned();
+        let id = format!("{}_{}", name, rand::random_range(0..100));
+
         Self {
-            id: Uuid::new_v4(),
+            id,
             name,
             class: HeroClass::Mage,
             health: Health {

@@ -1,12 +1,15 @@
-use uuid::Uuid;
-
 use crate::heroes::class::HeroClass;
 use crate::{Health, Hero};
 
+const WARRIOR_NAMES: [&str; 6] = ["Aldric", "Garrick", "Brom", "Cedric", "Darian", "Ronan"];
+
 impl Hero {
-    pub fn warrior(name: String) -> Self {
+    pub fn warrior() -> Self {
+        let name = WARRIOR_NAMES[rand::random_range(0..WARRIOR_NAMES.len())].to_owned();
+        let id = format!("{}_{}", name, rand::random_range(0..100));
+
         Self {
-            id: Uuid::new_v4(),
+            id,
             name,
             class: HeroClass::Warrior,
             health: Health {

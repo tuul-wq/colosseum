@@ -2,11 +2,9 @@ pub mod class;
 pub mod mage;
 pub mod warrior;
 
-use uuid::Uuid;
-
 use crate::heroes::class::HeroClass;
 
-pub type HeroId = Uuid;
+pub type HeroId = String;
 
 #[derive(Debug)]
 pub struct Hero {
@@ -39,7 +37,7 @@ mod tests {
 
     #[test]
     fn hero_takes_damage() {
-        let mut hero = Hero::warrior("Warrior".into());
+        let mut hero = Hero::warrior();
 
         hero.take_damage(25);
         assert_eq!(hero.health.current, hero.health.max - 25);
@@ -50,14 +48,14 @@ mod tests {
 
     #[test]
     fn hero_is_alive_when_health_is_above_zero() {
-        let hero = Hero::warrior("Warrior".into());
+        let hero = Hero::warrior();
 
         assert!(hero.is_alive());
     }
 
     #[test]
     fn hero_is_not_alive_when_health_is_zero() {
-        let mut hero = Hero::warrior("Warrior".into());
+        let mut hero = Hero::warrior();
 
         hero.take_damage(hero.health.max);
         assert!(!hero.is_alive());

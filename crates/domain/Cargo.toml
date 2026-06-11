@@ -4,5 +4,5 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
-uuid = { version = "1.23.2", features = ["v4"] }
+rand = "0.10.1"
 thiserror.workspace = true

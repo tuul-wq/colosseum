@@ -7,7 +7,7 @@ Colosseum is built as a backend/systems project first: domain modeling, turn log
 ## Current State
 
 - Rust 2024 Cargo workspace
-- Hero domain model with health, stats, UUIDs, and abilities
+- Hero domain model with health, stats, id, and abilities
 - Mage and Warrior hero archetypes
 - Position-based formations: frontline, midline, backline
 - World state for two opposing sides
@@ -54,4 +54,4 @@ crates/
 
 ## Tech Stack
 
-Rust, Cargo workspaces, Clap, UUID, Thiserror
+Rust, Cargo workspaces, Clap, Rand, Thiserror

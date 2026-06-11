@@ -11,8 +11,8 @@ fn main() {
         Commands::Fight => println!("Fight!"),
     }
 
-    let mage = Hero::mage("Mage_1".into());
-    let warrior = Hero::warrior("Warrior_1".into());
+    let mage = Hero::mage();
+    let warrior = Hero::warrior();
 
     let heroes = vec![mage, warrior];
 
