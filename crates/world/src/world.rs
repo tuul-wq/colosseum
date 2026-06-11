@@ -1,6 +1,7 @@
 use domain::{HeroId, Position};
 
-use crate::{WorldError, formation::Formation};
+use crate::errors::WorldError;
+use crate::formation::Formation;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct World {
@@ -96,10 +97,6 @@ mod tests {
 
     use super::*;
 
-    fn hero_id(name: &str) -> HeroId {
-        HeroId::new(name)
-    }
-
     #[test]
     fn new_creates_empty_formations_for_both_sides() {
         let world = World::new();
@@ -113,7 +110,7 @@ mod tests {
     #[test]
     fn place_stores_hero_on_selected_side_only() {
         let mut world = World::new();
-        let hero_id = hero_id("Warrior");
+        let hero_id = HeroId::new("Warrior");
 
         let result = world.place(Side::Left, &hero_id, Position::Frontline);
 
@@ -133,8 +130,8 @@ mod tests {
     #[test]
     fn remove_clears_hero_from_selected_side_only() {
         let mut world = World::new();
-        let left_hero_id = hero_id("Left");
-        let right_hero_id = hero_id("Right");
+        let left_hero_id = HeroId::new("Left");
+        let right_hero_id = HeroId::new("Right");
 
         world
             .place(Side::Left, &left_hero_id, Position::Frontline)
@@ -161,8 +158,8 @@ mod tests {
     #[test]
     fn move_to_moves_hero_on_selected_side_only() {
         let mut world = World::new();
-        let left_hero_id = hero_id("Left");
-        let right_hero_id = hero_id("Right");
+        let left_hero_id = HeroId::new("Left");
+        let right_hero_id = HeroId::new("Right");
 
         world
             .place(Side::Left, &left_hero_id, Position::Frontline)
@@ -193,9 +190,9 @@ mod tests {
     #[test]
     fn swap_with_swaps_heroes_on_selected_side() {
         let mut world = World::new();
-        let first_hero_id = hero_id("First");
-        let second_hero_id = hero_id("Second");
-        let right_hero_id = hero_id("Right");
+        let first_hero_id = HeroId::new("First");
+        let second_hero_id = HeroId::new("Second");
+        let right_hero_id = HeroId::new("Right");
 
         world
             .place(Side::Left, &first_hero_id, Position::Frontline)
@@ -235,8 +232,8 @@ mod tests {
     #[test]
     fn failed_place_preserves_existing_world_state() {
         let mut world = World::new();
-        let first_hero_id = hero_id("First");
-        let second_hero_id = hero_id("Second");
+        let first_hero_id = HeroId::new("First");
+        let second_hero_id = HeroId::new("Second");
 
         world
             .place(Side::Left, &first_hero_id, Position::Frontline)

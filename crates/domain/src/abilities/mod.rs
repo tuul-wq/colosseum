@@ -4,7 +4,7 @@ pub mod general;
 pub mod mage;
 pub mod warrior;
 
-use crate::Position;
+use crate::position::Position;
 
 #[derive(Debug)]
 pub struct Ability {

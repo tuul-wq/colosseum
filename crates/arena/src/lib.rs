@@ -1,3 +1,5 @@
 pub mod battle;
+pub mod events;
 
-pub use battle::{Battle, BattleEvents};
+pub use battle::Arena;
+pub use events::BattleEvents;

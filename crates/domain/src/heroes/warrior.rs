@@ -1,4 +1,5 @@
-use crate::{Health, Hero, HeroClass, HeroId};
+use crate::heroes::class::HeroClass;
+use crate::heroes::{Health, Hero, HeroId};
 
 const WARRIOR_NAMES: [&str; 6] = ["Aldric", "Garrick", "Brom", "Cedric", "Darian", "Ronan"];
 

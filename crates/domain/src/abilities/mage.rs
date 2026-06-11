@@ -1,5 +1,6 @@
 use crate::abilities::general::{main_attack, offhand_attack};
-use crate::{Ability, AbilityEffect, AbilityId, AbilityTarget, Position};
+use crate::abilities::{Ability, AbilityEffect, AbilityId, AbilityTarget};
+use crate::position::Position;
 
 pub fn mage_main_attack(damage: u8) -> Ability {
     Ability {

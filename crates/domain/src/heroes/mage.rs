@@ -1,6 +1,5 @@
-use rand;
-
-use crate::{Health, Hero, HeroClass, HeroId};
+use crate::heroes::class::HeroClass;
+use crate::heroes::{Health, Hero, HeroId};
 
 const MAGE_NAMES: [&str; 6] = ["Elowen", "Seraphina", "Mirella", "Isolde", "Lyra", "Amara"];
 
