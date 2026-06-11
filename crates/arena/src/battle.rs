@@ -1,4 +1,4 @@
-use domain::{AbilityId, Hero, HeroId};
+use domain::{AbilityId, HeroId};
 
 pub struct Battle {}
 

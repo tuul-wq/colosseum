@@ -2,9 +2,20 @@ pub mod class;
 pub mod mage;
 pub mod warrior;
 
-use crate::heroes::class::HeroClass;
+pub use crate::heroes::class::HeroClass;
 
-pub type HeroId = String;
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct HeroId(String);
+
+impl HeroId {
+    pub fn new(id: impl Into<String>) -> Self {
+        Self(id.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
 
 #[derive(Debug)]
 pub struct Hero {

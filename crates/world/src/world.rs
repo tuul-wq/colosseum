@@ -45,35 +45,35 @@ impl World {
         }
     }
 
-    pub fn all_heroes(&self, side: Side) -> Vec<HeroId> {
+    pub fn all_heroes(&self, side: Side) -> Vec<&HeroId> {
         self.formation(side).all_heroes()
     }
 
-    pub fn position_of(&self, side: Side, hero_id: HeroId) -> Option<Position> {
+    pub fn position_of(&self, side: Side, hero_id: &HeroId) -> Option<Position> {
         self.formation(side).position_of(hero_id)
     }
 
-    pub fn hero_at(&self, side: Side, position: Position) -> Option<HeroId> {
+    pub fn hero_at(&self, side: Side, position: Position) -> Option<&HeroId> {
         self.formation(side).hero_at(position)
     }
 
     pub fn place(
         &mut self,
         side: Side,
-        hero_id: HeroId,
+        hero_id: &HeroId,
         position: Position,
     ) -> Result<(), WorldError> {
         self.formation_mut(side).place(hero_id, position)
     }
 
-    pub fn remove(&mut self, side: Side, hero_id: HeroId) -> Result<(), WorldError> {
+    pub fn remove(&mut self, side: Side, hero_id: &HeroId) -> Result<(), WorldError> {
         self.formation_mut(side).remove(hero_id)
     }
 
     pub fn move_to(
         &mut self,
         side: Side,
-        hero_id: HeroId,
+        hero_id: &HeroId,
         new_position: Position,
     ) -> Result<(), WorldError> {
         self.formation_mut(side).move_to(hero_id, new_position)
@@ -82,8 +82,8 @@ impl World {
     pub fn swap_with(
         &mut self,
         side: Side,
-        first_hero_id: HeroId,
-        second_hero_id: HeroId,
+        first_hero_id: &HeroId,
+        second_hero_id: &HeroId,
     ) -> Result<(), WorldError> {
         self.formation_mut(side)
             .swap_with(first_hero_id, second_hero_id)
@@ -92,12 +92,12 @@ impl World {
 
 #[cfg(test)]
 mod tests {
-    use domain::{Hero, HeroId, Position};
+    use domain::{HeroId, Position};
 
     use super::*;
 
     fn hero_id(name: &str) -> HeroId {
-        Hero::warrior(name.into()).id
+        HeroId::new(name)
     }
 
     #[test]
@@ -115,19 +115,19 @@ mod tests {
         let mut world = World::new();
         let hero_id = hero_id("Warrior");
 
-        let result = world.place(Side::Left, hero_id, Position::Frontline);
+        let result = world.place(Side::Left, &hero_id, Position::Frontline);
 
         assert!(result.is_ok());
         assert_eq!(
             world.hero_at(Side::Left, Position::Frontline),
-            Some(hero_id)
+            Some(&hero_id)
         );
         assert_eq!(
-            world.position_of(Side::Left, hero_id),
+            world.position_of(Side::Left, &hero_id),
             Some(Position::Frontline)
         );
         assert_eq!(world.hero_at(Side::Right, Position::Frontline), None);
-        assert_eq!(world.position_of(Side::Right, hero_id), None);
+        assert_eq!(world.position_of(Side::Right, &hero_id), None);
     }
 
     #[test]
@@ -137,23 +137,23 @@ mod tests {
         let right_hero_id = hero_id("Right");
 
         world
-            .place(Side::Left, left_hero_id, Position::Frontline)
+            .place(Side::Left, &left_hero_id, Position::Frontline)
             .expect("left placement should succeed");
         world
-            .place(Side::Right, right_hero_id, Position::Frontline)
+            .place(Side::Right, &right_hero_id, Position::Frontline)
             .expect("right placement should succeed");
 
-        let result = world.remove(Side::Left, left_hero_id);
+        let result = world.remove(Side::Left, &left_hero_id);
 
         assert!(result.is_ok());
         assert_eq!(world.hero_at(Side::Left, Position::Frontline), None);
-        assert_eq!(world.position_of(Side::Left, left_hero_id), None);
+        assert_eq!(world.position_of(Side::Left, &left_hero_id), None);
         assert_eq!(
             world.hero_at(Side::Right, Position::Frontline),
-            Some(right_hero_id)
+            Some(&right_hero_id)
         );
         assert_eq!(
-            world.position_of(Side::Right, right_hero_id),
+            world.position_of(Side::Right, &right_hero_id),
             Some(Position::Frontline)
         );
     }
@@ -165,27 +165,27 @@ mod tests {
         let right_hero_id = hero_id("Right");
 
         world
-            .place(Side::Left, left_hero_id, Position::Frontline)
+            .place(Side::Left, &left_hero_id, Position::Frontline)
             .expect("left placement should succeed");
         world
-            .place(Side::Right, right_hero_id, Position::Frontline)
+            .place(Side::Right, &right_hero_id, Position::Frontline)
             .expect("right placement should succeed");
 
-        let result = world.move_to(Side::Left, left_hero_id, Position::Backline);
+        let result = world.move_to(Side::Left, &left_hero_id, Position::Backline);
 
         assert!(result.is_ok());
         assert_eq!(world.hero_at(Side::Left, Position::Frontline), None);
         assert_eq!(
             world.hero_at(Side::Left, Position::Backline),
-            Some(left_hero_id)
+            Some(&left_hero_id)
         );
         assert_eq!(
-            world.position_of(Side::Left, left_hero_id),
+            world.position_of(Side::Left, &left_hero_id),
             Some(Position::Backline)
         );
         assert_eq!(
             world.hero_at(Side::Right, Position::Frontline),
-            Some(right_hero_id)
+            Some(&right_hero_id)
         );
         assert_eq!(world.hero_at(Side::Right, Position::Backline), None);
     }
@@ -198,37 +198,37 @@ mod tests {
         let right_hero_id = hero_id("Right");
 
         world
-            .place(Side::Left, first_hero_id, Position::Frontline)
+            .place(Side::Left, &first_hero_id, Position::Frontline)
             .expect("first placement should succeed");
         world
-            .place(Side::Left, second_hero_id, Position::Backline)
+            .place(Side::Left, &second_hero_id, Position::Backline)
             .expect("second placement should succeed");
         world
-            .place(Side::Right, right_hero_id, Position::Frontline)
+            .place(Side::Right, &right_hero_id, Position::Frontline)
             .expect("right placement should succeed");
 
-        let result = world.swap_with(Side::Left, first_hero_id, second_hero_id);
+        let result = world.swap_with(Side::Left, &first_hero_id, &second_hero_id);
 
         assert!(result.is_ok());
         assert_eq!(
             world.hero_at(Side::Left, Position::Frontline),
-            Some(second_hero_id)
+            Some(&second_hero_id)
         );
         assert_eq!(
             world.hero_at(Side::Left, Position::Backline),
-            Some(first_hero_id)
+            Some(&first_hero_id)
         );
         assert_eq!(
-            world.position_of(Side::Left, first_hero_id),
+            world.position_of(Side::Left, &first_hero_id),
             Some(Position::Backline)
         );
         assert_eq!(
-            world.position_of(Side::Left, second_hero_id),
+            world.position_of(Side::Left, &second_hero_id),
             Some(Position::Frontline)
         );
         assert_eq!(
             world.hero_at(Side::Right, Position::Frontline),
-            Some(right_hero_id)
+            Some(&right_hero_id)
         );
     }
 
@@ -239,17 +239,17 @@ mod tests {
         let second_hero_id = hero_id("Second");
 
         world
-            .place(Side::Left, first_hero_id, Position::Frontline)
+            .place(Side::Left, &first_hero_id, Position::Frontline)
             .expect("initial placement should succeed");
 
-        let result = world.place(Side::Left, second_hero_id, Position::Frontline);
+        let result = world.place(Side::Left, &second_hero_id, Position::Frontline);
 
         assert!(matches!(result, Err(WorldError::PositionOccupied)));
         assert_eq!(
             world.hero_at(Side::Left, Position::Frontline),
-            Some(first_hero_id)
+            Some(&first_hero_id)
         );
-        assert_eq!(world.position_of(Side::Left, second_hero_id), None);
+        assert_eq!(world.position_of(Side::Left, &second_hero_id), None);
         assert_eq!(world.hero_at(Side::Right, Position::Frontline), None);
     }
 }

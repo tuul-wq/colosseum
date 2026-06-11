@@ -27,21 +27,21 @@ impl<'a> DecisionContext<'a> {
     pub fn get_allies(&self, side: Side) -> HashMap<HeroId, &'a Hero> {
         self.world
             .all_heroes(side)
-            .iter()
-            .filter_map(|id| self.targets.get(id).map(|&hero| (*id, hero)))
-            .collect::<HashMap<_, _>>()
+            .into_iter()
+            .filter_map(|id| self.targets.get(id).map(|&hero| (id.clone(), hero)))
+            .collect()
     }
 
     pub fn get_enemies(&self, side: Side) -> HashMap<HeroId, &'a Hero> {
         self.world
             .all_heroes(Side::other_side(side))
-            .iter()
-            .filter_map(|id| self.targets.get(id).map(|&hero| (*id, hero)))
-            .collect::<HashMap<_, _>>()
+            .into_iter()
+            .filter_map(|id| self.targets.get(id).map(|&hero| (id.clone(), hero)))
+            .collect()
     }
 
     pub fn actor_position(&self) -> Option<Position> {
-        self.world.position_of(self.side, self.actor.id)
+        self.world.position_of(self.side, &self.actor.id)
     }
 
     pub fn allies(&self) -> Vec<(HeroId, &'a Hero)> {
@@ -52,8 +52,8 @@ impl<'a> DecisionContext<'a> {
         self.heroes_on(Side::other_side(self.side))
     }
 
-    pub fn hero(&self, hero_id: HeroId) -> Option<&'a Hero> {
-        self.targets.get(&hero_id).copied()
+    pub fn hero(&self, hero_id: &HeroId) -> Option<&'a Hero> {
+        self.targets.get(hero_id).copied()
     }
 
     fn heroes_on(&self, side: Side) -> Vec<(HeroId, &'a Hero)> {
@@ -62,12 +62,12 @@ impl<'a> DecisionContext<'a> {
             .filter_map(|&position| {
                 self.world
                     .hero_at(side, position)
-                    .and_then(|hero_id| self.hero(hero_id).map(|hero| (hero_id, hero)))
+                    .and_then(|hero_id| self.hero(hero_id).map(|hero| (hero_id.clone(), hero)))
             })
             .collect()
     }
 
-    fn is_on_side(&self, side: Side, hero_id: HeroId) -> bool {
+    fn is_on_side(&self, side: Side, hero_id: &HeroId) -> bool {
         self.world.position_of(side, hero_id).is_some()
     }
 }
@@ -194,7 +194,7 @@ impl ScoringAi {
                 self.score_effect_on_targets(ctx, ability, &target_ids)
             }
             TurnAction::Move { to } => self.score_move(ctx, *to),
-            TurnAction::Swap { with } => self.score_swap(ctx, *with),
+            TurnAction::Swap { with } => self.score_swap(ctx, with),
             TurnAction::Bandage => self.score_bandage(ctx),
         }
     }
@@ -278,7 +278,7 @@ impl ScoringAi {
                         && self.target_position_matches(
                             ctx,
                             Side::other_side(caster_side),
-                            *hero_id,
+                            hero_id,
                             ability,
                         )
                 })
@@ -289,7 +289,7 @@ impl ScoringAi {
                 .into_iter()
                 .filter(|(hero_id, hero)| {
                     hero.is_alive()
-                        && self.target_position_matches(ctx, caster_side, *hero_id, ability)
+                        && self.target_position_matches(ctx, caster_side, hero_id, ability)
                 })
                 .map(|(hero_id, _)| TargetSelection::Single(hero_id))
                 .collect(),
@@ -302,7 +302,7 @@ impl ScoringAi {
                             && self.target_position_matches(
                                 ctx,
                                 Side::other_side(caster_side),
-                                *hero_id,
+                                hero_id,
                                 ability,
                             )
                     })
@@ -325,23 +325,23 @@ impl ScoringAi {
         target: &TargetSelection,
     ) -> Vec<HeroId> {
         match (&ability.target_type, target) {
-            (AbilityTarget::SelfTarget, TargetSelection::SelfTarget) => vec![ctx.actor.id],
+            (AbilityTarget::SelfTarget, TargetSelection::SelfTarget) => vec![ctx.actor.id.clone()],
             (AbilityTarget::Enemy, TargetSelection::Single(hero_id)) => {
                 let enemy_side = Side::other_side(ctx.side);
 
-                if ctx.is_on_side(enemy_side, *hero_id)
-                    && self.target_position_matches(ctx, enemy_side, *hero_id, ability)
+                if ctx.is_on_side(enemy_side, hero_id)
+                    && self.target_position_matches(ctx, enemy_side, hero_id, ability)
                 {
-                    vec![*hero_id]
+                    vec![hero_id.clone()]
                 } else {
                     Vec::new()
                 }
             }
             (AbilityTarget::Ally, TargetSelection::Single(hero_id)) => {
-                if ctx.is_on_side(ctx.side, *hero_id)
-                    && self.target_position_matches(ctx, ctx.side, *hero_id, ability)
+                if ctx.is_on_side(ctx.side, hero_id)
+                    && self.target_position_matches(ctx, ctx.side, hero_id, ability)
                 {
-                    vec![*hero_id]
+                    vec![hero_id.clone()]
                 } else {
                     Vec::new()
                 }
@@ -351,10 +351,10 @@ impl ScoringAi {
 
                 hero_ids
                     .iter()
-                    .copied()
+                    .cloned()
                     .filter(|hero_id| {
-                        ctx.is_on_side(enemy_side, *hero_id)
-                            && self.target_position_matches(ctx, enemy_side, *hero_id, ability)
+                        ctx.is_on_side(enemy_side, hero_id)
+                            && self.target_position_matches(ctx, enemy_side, hero_id, ability)
                     })
                     .collect()
             }
@@ -366,7 +366,7 @@ impl ScoringAi {
         &self,
         ctx: &DecisionContext,
         side: Side,
-        hero_id: HeroId,
+        hero_id: &HeroId,
         ability: &Ability,
     ) -> bool {
         ctx.world
@@ -383,12 +383,12 @@ impl ScoringAi {
         match &ability.effect_type {
             AbilityEffect::Damage(damage) => target_ids
                 .iter()
-                .filter_map(|hero_id| ctx.hero(*hero_id))
+                .filter_map(|hero_id| ctx.hero(hero_id))
                 .map(|target| self.score_damage(target, *damage))
                 .sum(),
             AbilityEffect::Heal(heal) => target_ids
                 .iter()
-                .filter_map(|hero_id| ctx.hero(*hero_id))
+                .filter_map(|hero_id| ctx.hero(hero_id))
                 .map(|target| self.score_heal(target, *heal))
                 .sum(),
             AbilityEffect::DamageReduction {
@@ -396,7 +396,7 @@ impl ScoringAi {
                 duration_turns,
             } => target_ids
                 .iter()
-                .filter_map(|hero_id| ctx.hero(*hero_id))
+                .filter_map(|hero_id| ctx.hero(hero_id))
                 .map(|target| self.score_damage_reduction(target, *amount, *duration_turns))
                 .sum(),
         }
@@ -460,12 +460,12 @@ impl ScoringAi {
             return INVALID_ACTION_SCORE;
         }
 
-        self.position_value(ctx, ctx.actor.id, ctx.actor, ctx.side, to)
-            - self.position_value(ctx, ctx.actor.id, ctx.actor, ctx.side, current_position)
+        self.position_value(ctx, &ctx.actor.id, ctx.actor, ctx.side, to)
+            - self.position_value(ctx, &ctx.actor.id, ctx.actor, ctx.side, current_position)
             - self.weights.move_cost
     }
 
-    fn score_swap(&self, ctx: &DecisionContext, ally_id: HeroId) -> i32 {
+    fn score_swap(&self, ctx: &DecisionContext, ally_id: &HeroId) -> i32 {
         let Some(actor_position) = ctx.actor_position() else {
             return INVALID_ACTION_SCORE;
         };
@@ -476,12 +476,13 @@ impl ScoringAi {
             return INVALID_ACTION_SCORE;
         };
 
-        if ally_id == ctx.actor.id || !ally.is_alive() {
+        if ally_id == &ctx.actor.id || !ally.is_alive() {
             return INVALID_ACTION_SCORE;
         }
 
-        let actor_gain = self.position_value(ctx, ctx.actor.id, ctx.actor, ctx.side, ally_position)
-            - self.position_value(ctx, ctx.actor.id, ctx.actor, ctx.side, actor_position);
+        let actor_gain =
+            self.position_value(ctx, &ctx.actor.id, ctx.actor, ctx.side, ally_position)
+                - self.position_value(ctx, &ctx.actor.id, ctx.actor, ctx.side, actor_position);
         let ally_gain = self.position_value(ctx, ally_id, ally, ctx.side, actor_position)
             - self.position_value(ctx, ally_id, ally, ctx.side, ally_position);
 
@@ -499,7 +500,7 @@ impl ScoringAi {
     fn position_value(
         &self,
         ctx: &DecisionContext,
-        hero_id: HeroId,
+        hero_id: &HeroId,
         hero: &Hero,
         side: Side,
         position: Position,
@@ -512,7 +513,7 @@ impl ScoringAi {
     fn best_future_ability_score(
         &self,
         ctx: &DecisionContext,
-        hero_id: HeroId,
+        hero_id: &HeroId,
         hero: &Hero,
         side: Side,
         position: Position,
@@ -543,7 +544,7 @@ impl ScoringAi {
         &self,
         ctx: &DecisionContext,
         ability: &Ability,
-        caster_id: HeroId,
+        caster_id: &HeroId,
         caster_side: Side,
     ) -> i32 {
         let mut best_score = 0;
@@ -571,27 +572,27 @@ impl ScoringAi {
         ctx: &DecisionContext,
         ability: &Ability,
         target: &TargetSelection,
-        caster_id: HeroId,
+        caster_id: &HeroId,
         caster_side: Side,
     ) -> Vec<HeroId> {
         match (&ability.target_type, target) {
-            (AbilityTarget::SelfTarget, TargetSelection::SelfTarget) => vec![caster_id],
+            (AbilityTarget::SelfTarget, TargetSelection::SelfTarget) => vec![caster_id.clone()],
             (AbilityTarget::Enemy, TargetSelection::Single(hero_id)) => {
                 let enemy_side = Side::other_side(caster_side);
 
-                if ctx.is_on_side(enemy_side, *hero_id)
-                    && self.target_position_matches(ctx, enemy_side, *hero_id, ability)
+                if ctx.is_on_side(enemy_side, hero_id)
+                    && self.target_position_matches(ctx, enemy_side, hero_id, ability)
                 {
-                    vec![*hero_id]
+                    vec![hero_id.clone()]
                 } else {
                     Vec::new()
                 }
             }
             (AbilityTarget::Ally, TargetSelection::Single(hero_id)) => {
-                if ctx.is_on_side(caster_side, *hero_id)
-                    && self.target_position_matches(ctx, caster_side, *hero_id, ability)
+                if ctx.is_on_side(caster_side, hero_id)
+                    && self.target_position_matches(ctx, caster_side, hero_id, ability)
                 {
-                    vec![*hero_id]
+                    vec![hero_id.clone()]
                 } else {
                     Vec::new()
                 }
@@ -601,10 +602,10 @@ impl ScoringAi {
 
                 hero_ids
                     .iter()
-                    .copied()
+                    .cloned()
                     .filter(|hero_id| {
-                        ctx.is_on_side(enemy_side, *hero_id)
-                            && self.target_position_matches(ctx, enemy_side, *hero_id, ability)
+                        ctx.is_on_side(enemy_side, hero_id)
+                            && self.target_position_matches(ctx, enemy_side, hero_id, ability)
                     })
                     .collect()
             }
@@ -676,26 +677,29 @@ mod tests {
             actor,
             world,
             side,
-            targets: heroes.into_iter().map(|hero| (hero.id, hero)).collect(),
+            targets: heroes
+                .into_iter()
+                .map(|hero| (hero.id.clone(), hero))
+                .collect(),
         }
     }
 
     #[test]
     fn chooses_lethal_target_over_healthier_enemy() {
-        let actor = Hero::mage("Mage".into());
-        let mut weak_enemy = Hero::warrior("Weak".into());
-        let healthy_enemy = Hero::warrior("Healthy".into());
+        let actor = Hero::mage();
+        let mut weak_enemy = Hero::warrior();
+        let healthy_enemy = Hero::warrior();
         let mut world = World::new();
 
         weak_enemy.take_damage(95);
         world
-            .place(Side::Left, actor.id, Position::Backline)
+            .place(Side::Left, &actor.id, Position::Backline)
             .expect("actor placement should succeed");
         world
-            .place(Side::Right, healthy_enemy.id, Position::Frontline)
+            .place(Side::Right, &healthy_enemy.id, Position::Frontline)
             .expect("healthy enemy placement should succeed");
         world
-            .place(Side::Right, weak_enemy.id, Position::Backline)
+            .place(Side::Right, &weak_enemy.id, Position::Backline)
             .expect("weak enemy placement should succeed");
 
         let ctx = context(
@@ -718,12 +722,12 @@ mod tests {
 
     #[test]
     fn chooses_bandage_for_critical_actor_when_no_enemy_is_available() {
-        let mut actor = Hero::warrior("Warrior".into());
+        let mut actor = Hero::warrior();
         let mut world = World::new();
 
         actor.take_damage(80);
         world
-            .place(Side::Left, actor.id, Position::Frontline)
+            .place(Side::Left, &actor.id, Position::Frontline)
             .expect("actor placement should succeed");
 
         let ctx = context(&actor, &world, Side::Left, vec![&actor]);
@@ -735,15 +739,15 @@ mod tests {
 
     #[test]
     fn chooses_move_when_a_better_position_unlocks_stronger_actions() {
-        let actor = Hero::mage("Mage".into());
-        let enemy = Hero::warrior("Enemy".into());
+        let actor = Hero::mage();
+        let enemy = Hero::warrior();
         let mut world = World::new();
 
         world
-            .place(Side::Left, actor.id, Position::Frontline)
+            .place(Side::Left, &actor.id, Position::Frontline)
             .expect("actor placement should succeed");
         world
-            .place(Side::Right, enemy.id, Position::Frontline)
+            .place(Side::Right, &enemy.id, Position::Frontline)
             .expect("enemy placement should succeed");
 
         let ctx = context(&actor, &world, Side::Left, vec![&actor, &enemy]);

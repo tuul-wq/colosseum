@@ -1,7 +1,6 @@
 use rand;
 
-use crate::heroes::class::HeroClass;
-use crate::{Health, Hero};
+use crate::{Health, Hero, HeroClass, HeroId};
 
 const MAGE_NAMES: [&str; 6] = ["Elowen", "Seraphina", "Mirella", "Isolde", "Lyra", "Amara"];
 
@@ -11,7 +10,7 @@ impl Hero {
         let id = format!("{}_{}", name, rand::random_range(0..100));
 
         Self {
-            id,
+            id: HeroId::new(id),
             name,
             class: HeroClass::Mage,
             health: Health {
