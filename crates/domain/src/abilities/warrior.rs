@@ -1,10 +1,16 @@
+use std::collections::HashSet;
+
 use crate::abilities::general::{main_attack, offhand_attack};
 use crate::{Ability, AbilityEffect, AbilityId, AbilityTarget, Position};
 
 pub fn warrior_main_attack(damage: u8) -> Ability {
     Ability {
         name: "Warrior club attack".into(),
-        ..main_attack(damage, Position::front(), Position::front())
+        ..main_attack(
+            damage,
+            HashSet::from([Position::Frontline]),
+            Position::front(),
+        )
     }
 }
 
@@ -20,9 +26,9 @@ pub fn slam() -> Ability {
         id: AbilityId::Slam,
         name: "Slam".into(),
         target_type: AbilityTarget::Enemy,
-        effect_type: AbilityEffect::Damage(15),
-        positions_from: Position::back(),
-        positions_to: Position::all(),
+        effect_type: AbilityEffect::Damage(13),
+        positions_from: HashSet::from([Position::Frontline]),
+        positions_to: Position::front(),
     }
 }
 
@@ -31,8 +37,8 @@ pub fn whirlwind() -> Ability {
         id: AbilityId::Whirlwind,
         name: "Whirlwind".into(),
         target_type: AbilityTarget::AreaOfEffect,
-        effect_type: AbilityEffect::Damage(8),
-        positions_from: Position::back(),
+        effect_type: AbilityEffect::Damage(6),
+        positions_from: HashSet::from([Position::Frontline]),
         positions_to: Position::front(),
     }
 }

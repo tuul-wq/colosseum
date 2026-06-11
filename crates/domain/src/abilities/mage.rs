@@ -31,7 +31,7 @@ pub fn arcane_explosion() -> Ability {
         id: AbilityId::ArcaneExplosion,
         name: "Arcane Explosion".into(),
         target_type: AbilityTarget::AreaOfEffect,
-        effect_type: AbilityEffect::Damage(8),
+        effect_type: AbilityEffect::Damage(6),
         positions_from: Position::back(),
         positions_to: Position::front(),
     }

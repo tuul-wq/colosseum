@@ -11,16 +11,10 @@ pub type HeroId = Uuid;
 #[derive(Debug)]
 pub struct Hero {
     pub id: HeroId,
-    pub stats: Stats,
-    pub class: HeroClass,
-}
-
-#[derive(Debug)]
-pub struct Stats {
     pub name: String,
     pub health: Health,
     pub initiative: u8,
-    pub speed: u8,
+    pub class: HeroClass,
 }
 
 #[derive(Debug)]
@@ -31,11 +25,11 @@ pub struct Health {
 
 impl Hero {
     pub fn take_damage(&mut self, damage: u8) {
-        self.stats.health.current = self.stats.health.current.saturating_sub(damage);
+        self.health.current = self.health.current.saturating_sub(damage);
     }
 
     pub fn is_alive(&self) -> bool {
-        self.stats.health.current > 0
+        self.health.current > 0
     }
 }
 
@@ -48,10 +42,10 @@ mod tests {
         let mut hero = Hero::warrior("Warrior".into());
 
         hero.take_damage(25);
-        assert_eq!(hero.stats.health.current, 75);
+        assert_eq!(hero.health.current, hero.health.max - 25);
 
         hero.take_damage(95);
-        assert_eq!(hero.stats.health.current, 0);
+        assert_eq!(hero.health.current, 0);
     }
 
     #[test]
@@ -65,7 +59,7 @@ mod tests {
     fn hero_is_not_alive_when_health_is_zero() {
         let mut hero = Hero::warrior("Warrior".into());
 
-        hero.take_damage(100);
+        hero.take_damage(hero.health.max);
         assert!(!hero.is_alive());
     }
 }

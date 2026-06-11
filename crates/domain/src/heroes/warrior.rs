@@ -1,22 +1,19 @@
 use uuid::Uuid;
 
 use crate::heroes::class::HeroClass;
-use crate::{Health, Hero, Stats};
+use crate::{Health, Hero};
 
 impl Hero {
     pub fn warrior(name: String) -> Self {
         Self {
             id: Uuid::new_v4(),
+            name,
             class: HeroClass::Warrior,
-            stats: Stats {
-                name,
-                health: Health {
-                    max: 100,
-                    current: 100,
-                },
-                initiative: 10,
-                speed: 2,
+            health: Health {
+                max: 110,
+                current: 110,
             },
+            initiative: 8,
         }
     }
 }

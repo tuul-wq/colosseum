@@ -12,7 +12,7 @@ impl HeroClass {
     pub fn abilities(&self) -> HashMap<AbilityId, Ability> {
         match self {
             HeroClass::Mage => HashMap::from([
-                (AbilityId::MainAttack, mage_abilities::mage_main_attack(6)),
+                (AbilityId::MainAttack, mage_abilities::mage_main_attack(5)),
                 (
                     AbilityId::OffhandAttack,
                     mage_abilities::mage_offhand_attack(3),
@@ -26,11 +26,11 @@ impl HeroClass {
             HeroClass::Warrior => HashMap::from([
                 (
                     AbilityId::MainAttack,
-                    warrior_abilities::warrior_main_attack(8),
+                    warrior_abilities::warrior_main_attack(9),
                 ),
                 (
                     AbilityId::OffhandAttack,
-                    warrior_abilities::warrior_offhand_attack(4),
+                    warrior_abilities::warrior_offhand_attack(5),
                 ),
                 (AbilityId::Slam, warrior_abilities::slam()),
                 (AbilityId::Whirlwind, warrior_abilities::whirlwind()),
