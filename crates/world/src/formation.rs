@@ -56,6 +56,8 @@ impl Formation {
             .insert(pos, None)
             .ok_or(WorldError::PositionNotFound)?;
 
+        self.compact_forward();
+
         Ok(())
     }
 
@@ -97,6 +99,23 @@ impl Formation {
         self.slots.insert(second_hero_pos, Some(first_hero_id));
 
         Ok(())
+    }
+
+    fn compact_forward(&mut self) {
+        let front_hero = self.hero_at(Position::Frontline);
+        let mid_hero = self.hero_at(Position::Midline);
+        let back_hero = self.hero_at(Position::Backline);
+
+        let heroes: Vec<HeroId> = [front_hero, mid_hero, back_hero]
+            .into_iter()
+            .flatten()
+            .collect();
+
+        self.slots
+            .insert(Position::Frontline, heroes.get(0).copied());
+        self.slots.insert(Position::Midline, heroes.get(1).copied());
+        self.slots
+            .insert(Position::Backline, heroes.get(2).copied());
     }
 }
 
@@ -194,6 +213,37 @@ mod tests {
 
         assert!(matches!(result, Err(WorldError::HeroNotFound)));
         assert_eq!(formation.slots.len(), Position::all().len());
+    }
+
+    #[test]
+    fn remove_compacts_midline_and_backline_forward_when_frontline_is_removed() {
+        let mut formation = Formation::new();
+        let front_hero_id = hero_id("Front");
+        let mid_hero_id = hero_id("Mid");
+        let back_hero_id = hero_id("Back");
+
+        formation
+            .place(front_hero_id, Position::Frontline)
+            .expect("front placement should succeed");
+        formation
+            .place(mid_hero_id, Position::Midline)
+            .expect("mid placement should succeed");
+        formation
+            .place(back_hero_id, Position::Backline)
+            .expect("back placement should succeed");
+
+        let result = formation.remove(front_hero_id);
+
+        assert!(result.is_ok());
+        assert_eq!(formation.hero_at(Position::Frontline), Some(mid_hero_id));
+        assert_eq!(formation.hero_at(Position::Midline), Some(back_hero_id));
+        assert_eq!(formation.hero_at(Position::Backline), None);
+        assert_eq!(formation.position_of(front_hero_id), None);
+        assert_eq!(
+            formation.position_of(mid_hero_id),
+            Some(Position::Frontline)
+        );
+        assert_eq!(formation.position_of(back_hero_id), Some(Position::Midline));
     }
 
     #[test]
