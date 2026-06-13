@@ -1,35 +1,37 @@
 use domain::abilities::AbilityId;
 use domain::heroes::HeroId;
 
-pub enum BattleEvents {
+pub enum BattleEvent {
     GameStarted {
         left_side: Vec<HeroId>,
         right_side: Vec<HeroId>,
     },
     TurnStarted {
-        hero_id: HeroId,
+        source: HeroId,
     },
     AbilityUsed {
-        hero_id: HeroId,
+        source: HeroId,
         ability_id: AbilityId,
     },
     DamageDealt {
-        hero_id: HeroId,
+        source: HeroId,
+        target: HeroId,
         amount: u8,
     },
     Healed {
-        hero_id: HeroId,
+        source: HeroId,
+        target: HeroId,
         amount: u8,
     },
     HeroDied {
-        hero_id: HeroId,
+        source: HeroId,
     },
     Swapped {
-        first: HeroId,
-        second: HeroId,
+        source: HeroId,
+        target: HeroId,
     },
     Bandaged {
-        hero_id: HeroId,
+        source: HeroId,
         amount: u8,
     },
 }

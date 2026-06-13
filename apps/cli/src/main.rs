@@ -1,4 +1,5 @@
-use arguments::{Cli, Commands};
+use arena::{Arena, ArenaLineup};
+use arguments::{Cli, HeroArg, LineupArg, TeamArg};
 use clap::Parser;
 use domain::Hero;
 
@@ -6,10 +7,12 @@ mod arguments;
 
 fn main() {
     let cli = Cli::parse();
+    let lineup_name = cli.lineup.as_str();
 
     match cli.command {
         Commands::Fight => println!("Fight!"),
     }
+}
 
     let mage = Hero::mage();
     let warrior = Hero::warrior();

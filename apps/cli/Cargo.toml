@@ -6,4 +6,5 @@ edition.workspace = true
 [dependencies]
 clap = { version = "4.6.1", features = ["derive"] }
 domain = { path = "../../crates/domain" }
+arena = { path = "../../crates/arena" }
 thiserror.workspace = true

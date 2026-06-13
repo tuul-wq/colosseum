@@ -1,7 +1,7 @@
 use domain::{HeroId, Position};
 
 use crate::errors::WorldError;
-use crate::formation::Formation;
+use crate::formation::{Formation, Lineup};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct World {
@@ -25,10 +25,10 @@ impl Side {
 }
 
 impl World {
-    pub fn new() -> Self {
+    pub fn new(left_team: Lineup, right_team: Lineup) -> Self {
         Self {
-            left: Formation::new(),
-            right: Formation::new(),
+            left: Formation::new(left_team),
+            right: Formation::new(right_team),
         }
     }
 
@@ -97,81 +97,103 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn new_creates_empty_formations_for_both_sides() {
-        let world = World::new();
+    fn hero_id(name: &str) -> HeroId {
+        HeroId::new(name)
+    }
 
-        for position in Position::all() {
-            assert_eq!(world.hero_at(Side::Left, position), None);
-            assert_eq!(world.hero_at(Side::Right, position), None);
+    fn lineup(first: &str, second: &str) -> Lineup {
+        Lineup::Two {
+            frontline: hero_id(first),
+            midline: hero_id(second),
         }
+    }
+
+    fn world() -> World {
+        World::new(
+            lineup("LeftFront", "LeftMid"),
+            lineup("RightFront", "RightMid"),
+        )
+    }
+
+    #[test]
+    fn new_creates_formations_for_both_sides() {
+        let world = world();
+        let left_front_hero_id = hero_id("LeftFront");
+        let left_mid_hero_id = hero_id("LeftMid");
+        let right_front_hero_id = hero_id("RightFront");
+        let right_mid_hero_id = hero_id("RightMid");
+
+        assert_eq!(
+            world.hero_at(Side::Left, Position::Frontline),
+            Some(&left_front_hero_id)
+        );
+        assert_eq!(
+            world.hero_at(Side::Left, Position::Midline),
+            Some(&left_mid_hero_id)
+        );
+        assert_eq!(world.hero_at(Side::Left, Position::Backline), None);
+        assert_eq!(
+            world.hero_at(Side::Right, Position::Frontline),
+            Some(&right_front_hero_id)
+        );
+        assert_eq!(
+            world.hero_at(Side::Right, Position::Midline),
+            Some(&right_mid_hero_id)
+        );
+        assert_eq!(world.hero_at(Side::Right, Position::Backline), None);
     }
 
     #[test]
     fn place_stores_hero_on_selected_side_only() {
-        let mut world = World::new();
-        let hero_id = HeroId::new("Warrior");
+        let mut world = world();
+        let hero_id = hero_id("LeftBack");
 
-        let result = world.place(Side::Left, &hero_id, Position::Frontline);
+        let result = world.place(Side::Left, &hero_id, Position::Backline);
 
         assert!(result.is_ok());
         assert_eq!(
-            world.hero_at(Side::Left, Position::Frontline),
+            world.hero_at(Side::Left, Position::Backline),
             Some(&hero_id)
         );
         assert_eq!(
             world.position_of(Side::Left, &hero_id),
-            Some(Position::Frontline)
+            Some(Position::Backline)
         );
-        assert_eq!(world.hero_at(Side::Right, Position::Frontline), None);
+        assert_eq!(world.hero_at(Side::Right, Position::Backline), None);
         assert_eq!(world.position_of(Side::Right, &hero_id), None);
     }
 
     #[test]
     fn remove_clears_hero_from_selected_side_only() {
-        let mut world = World::new();
-        let left_hero_id = HeroId::new("Left");
-        let right_hero_id = HeroId::new("Right");
-
-        world
-            .place(Side::Left, &left_hero_id, Position::Frontline)
-            .expect("left placement should succeed");
-        world
-            .place(Side::Right, &right_hero_id, Position::Frontline)
-            .expect("right placement should succeed");
+        let mut world = world();
+        let left_hero_id = hero_id("LeftMid");
+        let right_hero_id = hero_id("RightMid");
 
         let result = world.remove(Side::Left, &left_hero_id);
 
         assert!(result.is_ok());
-        assert_eq!(world.hero_at(Side::Left, Position::Frontline), None);
+        assert_eq!(world.hero_at(Side::Left, Position::Midline), None);
         assert_eq!(world.position_of(Side::Left, &left_hero_id), None);
         assert_eq!(
-            world.hero_at(Side::Right, Position::Frontline),
+            world.hero_at(Side::Right, Position::Midline),
             Some(&right_hero_id)
         );
         assert_eq!(
             world.position_of(Side::Right, &right_hero_id),
-            Some(Position::Frontline)
+            Some(Position::Midline)
         );
     }
 
     #[test]
     fn move_to_moves_hero_on_selected_side_only() {
-        let mut world = World::new();
-        let left_hero_id = HeroId::new("Left");
-        let right_hero_id = HeroId::new("Right");
-
-        world
-            .place(Side::Left, &left_hero_id, Position::Frontline)
-            .expect("left placement should succeed");
-        world
-            .place(Side::Right, &right_hero_id, Position::Frontline)
-            .expect("right placement should succeed");
+        let mut world = world();
+        let left_hero_id = hero_id("LeftMid");
+        let right_hero_id = hero_id("RightMid");
 
         let result = world.move_to(Side::Left, &left_hero_id, Position::Backline);
 
         assert!(result.is_ok());
-        assert_eq!(world.hero_at(Side::Left, Position::Frontline), None);
+        assert_eq!(world.hero_at(Side::Left, Position::Midline), None);
         assert_eq!(
             world.hero_at(Side::Left, Position::Backline),
             Some(&left_hero_id)
@@ -181,7 +203,7 @@ mod tests {
             Some(Position::Backline)
         );
         assert_eq!(
-            world.hero_at(Side::Right, Position::Frontline),
+            world.hero_at(Side::Right, Position::Midline),
             Some(&right_hero_id)
         );
         assert_eq!(world.hero_at(Side::Right, Position::Backline), None);
@@ -189,20 +211,10 @@ mod tests {
 
     #[test]
     fn swap_with_swaps_heroes_on_selected_side() {
-        let mut world = World::new();
-        let first_hero_id = HeroId::new("First");
-        let second_hero_id = HeroId::new("Second");
-        let right_hero_id = HeroId::new("Right");
-
-        world
-            .place(Side::Left, &first_hero_id, Position::Frontline)
-            .expect("first placement should succeed");
-        world
-            .place(Side::Left, &second_hero_id, Position::Backline)
-            .expect("second placement should succeed");
-        world
-            .place(Side::Right, &right_hero_id, Position::Frontline)
-            .expect("right placement should succeed");
+        let mut world = world();
+        let first_hero_id = hero_id("LeftFront");
+        let second_hero_id = hero_id("LeftMid");
+        let right_hero_id = hero_id("RightFront");
 
         let result = world.swap_with(Side::Left, &first_hero_id, &second_hero_id);
 
@@ -212,12 +224,12 @@ mod tests {
             Some(&second_hero_id)
         );
         assert_eq!(
-            world.hero_at(Side::Left, Position::Backline),
+            world.hero_at(Side::Left, Position::Midline),
             Some(&first_hero_id)
         );
         assert_eq!(
             world.position_of(Side::Left, &first_hero_id),
-            Some(Position::Backline)
+            Some(Position::Midline)
         );
         assert_eq!(
             world.position_of(Side::Left, &second_hero_id),
@@ -231,13 +243,9 @@ mod tests {
 
     #[test]
     fn failed_place_preserves_existing_world_state() {
-        let mut world = World::new();
-        let first_hero_id = HeroId::new("First");
-        let second_hero_id = HeroId::new("Second");
-
-        world
-            .place(Side::Left, &first_hero_id, Position::Frontline)
-            .expect("initial placement should succeed");
+        let mut world = world();
+        let first_hero_id = hero_id("LeftFront");
+        let second_hero_id = hero_id("Second");
 
         let result = world.place(Side::Left, &second_hero_id, Position::Frontline);
 
@@ -247,6 +255,9 @@ mod tests {
             Some(&first_hero_id)
         );
         assert_eq!(world.position_of(Side::Left, &second_hero_id), None);
-        assert_eq!(world.hero_at(Side::Right, Position::Frontline), None);
+        assert_eq!(
+            world.hero_at(Side::Right, Position::Frontline),
+            Some(&hero_id("RightFront"))
+        );
     }
 }

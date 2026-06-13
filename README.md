@@ -30,7 +30,8 @@ Colosseum is built as a backend/systems project first: domain modeling, turn log
 ## Run
 
 ```bash
-cargo run -p cli -- fight
+cargo run -p cli -- 2v2 mage,warrior warrior,mage
+cargo run -p cli -- 3v3 mage,warrior,mage warrior,mage,warrior
 ```
 
 ## Test
