@@ -9,7 +9,7 @@ pub fn warrior_main_attack(damage: u8) -> Ability {
         name: "Warrior club attack".into(),
         ..main_attack(
             damage,
-            HashSet::from([Position::Frontline]),
+            HashSet::from([Position::FRONTLINE]),
             Position::front(),
         )
     }
@@ -28,7 +28,7 @@ pub fn slam() -> Ability {
         name: "Slam".into(),
         target_type: AbilityTarget::Enemy,
         effect_type: AbilityEffect::Damage(13),
-        positions_from: HashSet::from([Position::Frontline]),
+        positions_from: HashSet::from([Position::FRONTLINE]),
         positions_to: Position::front(),
     }
 }
@@ -39,7 +39,7 @@ pub fn whirlwind() -> Ability {
         name: "Whirlwind".into(),
         target_type: AbilityTarget::AreaOfEffect,
         effect_type: AbilityEffect::Damage(6),
-        positions_from: HashSet::from([Position::Frontline]),
+        positions_from: HashSet::from([Position::FRONTLINE]),
         positions_to: Position::front(),
     }
 }

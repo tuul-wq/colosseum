@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::abilities::{Ability, AbilityId, mage as mage_abilities, warrior as warrior_abilities};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HeroClass {
     Mage,
     Warrior,

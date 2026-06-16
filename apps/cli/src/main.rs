@@ -1,24 +1,13 @@
-use arena::{Arena, ArenaLineup};
-use arguments::{Cli, HeroArg, LineupArg, TeamArg};
+use arena::Arena;
 use clap::Parser;
-use domain::Hero;
 
+use crate::arguments::Cli;
+
+mod arena_setup;
 mod arguments;
 
 fn main() {
-    let cli = Cli::parse();
-    let lineup_name = cli.lineup.as_str();
+    let setup = arena_setup::from_cli(Cli::parse()).unwrap_or_else(|error| error.exit());
 
-    match cli.command {
-        Commands::Fight => println!("Fight!"),
-    }
-}
-
-    let mage = Hero::mage();
-    let warrior = Hero::warrior();
-
-    let heroes = vec![mage, warrior];
-
-    println!("mage - {:?}", heroes[0]);
-    println!("warrior - {:?}", heroes[1]);
+    Arena::new(setup);
 }

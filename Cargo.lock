@@ -137,7 +137,6 @@ dependencies = [
  "arena",
  "clap",
  "domain",
- "thiserror",
 ]
 
 [[package]]

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use domain::heroes::HeroId;
 use domain::position::Position;
 
@@ -7,61 +5,80 @@ use crate::errors::WorldError;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Formation {
-    slots: HashMap<Position, Option<HeroId>>,
+    slots: Vec<Option<HeroId>>,
 }
 
-#[derive(Debug)]
-pub enum Lineup {
-    Two {
-        frontline: HeroId,
-        midline: HeroId,
-    },
-    Three {
-        frontline: HeroId,
-        midline: HeroId,
-        backline: HeroId,
-    },
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Lineup {
+    heroes: Vec<HeroId>,
+    position_count: usize,
+}
+
+impl Lineup {
+    pub fn new(heroes: Vec<HeroId>) -> Self {
+        let position_count = heroes.len();
+
+        Self {
+            heroes,
+            position_count,
+        }
+    }
+
+    pub fn with_position_count(heroes: Vec<HeroId>, position_count: usize) -> Self {
+        assert!(
+            position_count >= heroes.len(),
+            "lineup position count must fit all heroes"
+        );
+
+        Self {
+            heroes,
+            position_count,
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.heroes.len()
+    }
+
+    pub fn position_count(&self) -> usize {
+        self.position_count
+    }
+}
+
+impl<const N: usize> From<[HeroId; N]> for Lineup {
+    fn from(heroes: [HeroId; N]) -> Self {
+        Self::new(heroes.into())
+    }
 }
 
 impl Formation {
     pub fn new(lineup: Lineup) -> Self {
-        let mut slots = HashMap::from([
-            (Position::Frontline, None),
-            (Position::Midline, None),
-            (Position::Backline, None),
-        ]);
+        let mut slots = vec![None; lineup.position_count];
 
-        match lineup {
-            Lineup::Two { frontline, midline } => {
-                slots.insert(Position::Frontline, Some(frontline));
-                slots.insert(Position::Midline, Some(midline));
-            }
-            Lineup::Three {
-                frontline,
-                midline,
-                backline,
-            } => {
-                slots.insert(Position::Frontline, Some(frontline));
-                slots.insert(Position::Midline, Some(midline));
-                slots.insert(Position::Backline, Some(backline));
-            }
+        for (slot, hero_id) in slots.iter_mut().zip(lineup.heroes) {
+            *slot = Some(hero_id);
         }
 
         Self { slots }
     }
 
     pub fn all_heroes(&self) -> Vec<&HeroId> {
-        self.slots.values().filter_map(|el| el.as_ref()).collect()
+        self.slots.iter().filter_map(Option::as_ref).collect()
     }
 
     pub fn position_of(&self, hero_id: &HeroId) -> Option<Position> {
         self.slots
             .iter()
-            .find_map(|(&pos, id)| (id.as_ref() == Some(hero_id)).then_some(pos))
+            .enumerate()
+            .find_map(|(index, id)| (id.as_ref() == Some(hero_id)).then_some(Position::new(index)))
     }
 
     pub fn hero_at(&self, position: Position) -> Option<&HeroId> {
-        self.slots.get(&position).and_then(Option::as_ref)
+        self.slots.get(position.index()).and_then(Option::as_ref)
+    }
+
+    pub fn has_position(&self, position: Position) -> bool {
+        self.slots.get(position.index()).is_some()
     }
 
     pub fn place(&mut self, hero_id: &HeroId, position: Position) -> Result<(), WorldError> {
@@ -71,7 +88,7 @@ impl Formation {
 
         let slot = self
             .slots
-            .get_mut(&position)
+            .get_mut(position.index())
             .ok_or(WorldError::PositionNotFound)?;
 
         if slot.is_some() {
@@ -86,9 +103,11 @@ impl Formation {
     pub fn remove(&mut self, hero_id: &HeroId) -> Result<(), WorldError> {
         let pos = self.position_of(hero_id).ok_or(WorldError::HeroNotFound)?;
 
-        self.slots
-            .insert(pos, None)
+        let slot = self
+            .slots
+            .get_mut(pos.index())
             .ok_or(WorldError::PositionNotFound)?;
+        *slot = None;
 
         self.compact_forward();
 
@@ -102,7 +121,7 @@ impl Formation {
             return Ok(());
         }
 
-        if !self.slots.contains_key(&new_position) {
+        if !self.has_position(new_position) {
             return Err(WorldError::PositionNotFound);
         }
 
@@ -110,8 +129,8 @@ impl Formation {
             return Err(WorldError::PositionOccupied);
         }
 
-        self.slots.insert(new_position, Some(hero_id.clone()));
-        self.slots.insert(curr_pos, None);
+        self.slots[new_position.index()] = Some(hero_id.clone());
+        self.slots[curr_pos.index()] = None;
 
         Ok(())
     }
@@ -129,35 +148,19 @@ impl Formation {
             .position_of(second_hero_id)
             .ok_or(WorldError::HeroNotFound)?;
 
-        self.slots
-            .insert(first_hero_pos, Some(second_hero_id.clone()));
-        self.slots
-            .insert(second_hero_pos, Some(first_hero_id.clone()));
+        self.slots[first_hero_pos.index()] = Some(second_hero_id.clone());
+        self.slots[second_hero_pos.index()] = Some(first_hero_id.clone());
 
         Ok(())
     }
 
     fn compact_forward(&mut self) {
-        let front_hero = self
-            .slots
-            .get_mut(&Position::Frontline)
-            .and_then(Option::take);
+        let heroes: Vec<_> = self.slots.iter_mut().filter_map(Option::take).collect();
+        let mut heroes = heroes.into_iter();
 
-        let mid_hero = self
-            .slots
-            .get_mut(&Position::Midline)
-            .and_then(Option::take);
-
-        let back_hero = self
-            .slots
-            .get_mut(&Position::Backline)
-            .and_then(Option::take);
-
-        let mut heroes = [front_hero, mid_hero, back_hero].into_iter().flatten();
-
-        self.slots.insert(Position::Frontline, heroes.next());
-        self.slots.insert(Position::Midline, heroes.next());
-        self.slots.insert(Position::Backline, heroes.next());
+        for slot in &mut self.slots {
+            *slot = heroes.next();
+        }
     }
 }
 
@@ -172,18 +175,18 @@ mod tests {
     }
 
     fn two_hero_formation() -> Formation {
-        Formation::new(Lineup::Two {
-            frontline: hero_id("Front"),
-            midline: hero_id("Mid"),
-        })
+        Formation::new(Lineup::with_position_count(
+            vec![hero_id("Front"), hero_id("Mid")],
+            Position::all().len(),
+        ))
     }
 
     fn three_hero_formation() -> Formation {
-        Formation::new(Lineup::Three {
-            frontline: hero_id("Front"),
-            midline: hero_id("Mid"),
-            backline: hero_id("Back"),
-        })
+        Formation::new(Lineup::new(vec![
+            hero_id("Front"),
+            hero_id("Mid"),
+            hero_id("Back"),
+        ]))
     }
 
     #[test]
@@ -193,12 +196,12 @@ mod tests {
         let mid_hero_id = hero_id("Mid");
 
         for position in Position::all() {
-            assert!(formation.slots.contains_key(&position));
+            assert!(formation.has_position(position));
         }
 
-        assert_eq!(formation.hero_at(Position::Frontline), Some(&front_hero_id));
-        assert_eq!(formation.hero_at(Position::Midline), Some(&mid_hero_id));
-        assert_eq!(formation.hero_at(Position::Backline), None);
+        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&front_hero_id));
+        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&mid_hero_id));
+        assert_eq!(formation.hero_at(Position::BACKLINE), None);
         assert_eq!(formation.slots.len(), Position::all().len());
     }
 
@@ -209,10 +212,26 @@ mod tests {
         let mid_hero_id = hero_id("Mid");
         let back_hero_id = hero_id("Back");
 
-        assert_eq!(formation.hero_at(Position::Frontline), Some(&front_hero_id));
-        assert_eq!(formation.hero_at(Position::Midline), Some(&mid_hero_id));
-        assert_eq!(formation.hero_at(Position::Backline), Some(&back_hero_id));
+        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&front_hero_id));
+        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&mid_hero_id));
+        assert_eq!(formation.hero_at(Position::BACKLINE), Some(&back_hero_id));
         assert_eq!(formation.slots.len(), Position::all().len());
+    }
+
+    #[test]
+    fn new_supports_more_than_three_ordered_positions() {
+        let formation = Formation::new(Lineup::new(vec![
+            hero_id("One"),
+            hero_id("Two"),
+            hero_id("Three"),
+            hero_id("Four"),
+            hero_id("Five"),
+        ]));
+
+        assert_eq!(formation.hero_at(Position::new(0)), Some(&hero_id("One")));
+        assert_eq!(formation.hero_at(Position::new(3)), Some(&hero_id("Four")));
+        assert_eq!(formation.hero_at(Position::new(4)), Some(&hero_id("Five")));
+        assert_eq!(formation.hero_at(Position::new(5)), None);
     }
 
     #[test]
@@ -220,11 +239,11 @@ mod tests {
         let mut formation = two_hero_formation();
         let hero_id = hero_id("Back");
 
-        let result = formation.place(&hero_id, Position::Backline);
+        let result = formation.place(&hero_id, Position::BACKLINE);
 
         assert!(result.is_ok());
-        assert_eq!(formation.hero_at(Position::Backline), Some(&hero_id));
-        assert_eq!(formation.position_of(&hero_id), Some(Position::Backline));
+        assert_eq!(formation.hero_at(Position::BACKLINE), Some(&hero_id));
+        assert_eq!(formation.position_of(&hero_id), Some(Position::BACKLINE));
     }
 
     #[test]
@@ -233,10 +252,10 @@ mod tests {
         let first_hero_id = hero_id("Front");
         let second_hero_id = hero_id("Second");
 
-        let result = formation.place(&second_hero_id, Position::Frontline);
+        let result = formation.place(&second_hero_id, Position::FRONTLINE);
 
         assert!(matches!(result, Err(WorldError::PositionOccupied)));
-        assert_eq!(formation.hero_at(Position::Frontline), Some(&first_hero_id));
+        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&first_hero_id));
         assert_eq!(formation.position_of(&second_hero_id), None);
     }
 
@@ -245,12 +264,12 @@ mod tests {
         let mut formation = two_hero_formation();
         let hero_id = hero_id("Front");
 
-        let result = formation.place(&hero_id, Position::Backline);
+        let result = formation.place(&hero_id, Position::BACKLINE);
 
         assert!(matches!(result, Err(WorldError::PositionOccupied)));
-        assert_eq!(formation.hero_at(Position::Frontline), Some(&hero_id));
-        assert_eq!(formation.hero_at(Position::Backline), None);
-        assert_eq!(formation.position_of(&hero_id), Some(Position::Frontline));
+        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&hero_id));
+        assert_eq!(formation.hero_at(Position::BACKLINE), None);
+        assert_eq!(formation.position_of(&hero_id), Some(Position::FRONTLINE));
     }
 
     #[test]
@@ -262,9 +281,9 @@ mod tests {
         let result = formation.remove(&hero_id);
 
         assert!(result.is_ok());
-        assert_eq!(formation.hero_at(Position::Frontline), Some(&front_hero_id));
-        assert_eq!(formation.hero_at(Position::Midline), None);
-        assert!(formation.slots.contains_key(&Position::Midline));
+        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&front_hero_id));
+        assert_eq!(formation.hero_at(Position::MIDLINE), None);
+        assert!(formation.has_position(Position::MIDLINE));
         assert_eq!(formation.position_of(&hero_id), None);
     }
 
@@ -289,17 +308,17 @@ mod tests {
         let result = formation.remove(&front_hero_id);
 
         assert!(result.is_ok());
-        assert_eq!(formation.hero_at(Position::Frontline), Some(&mid_hero_id));
-        assert_eq!(formation.hero_at(Position::Midline), Some(&back_hero_id));
-        assert_eq!(formation.hero_at(Position::Backline), None);
+        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&mid_hero_id));
+        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&back_hero_id));
+        assert_eq!(formation.hero_at(Position::BACKLINE), None);
         assert_eq!(formation.position_of(&front_hero_id), None);
         assert_eq!(
             formation.position_of(&mid_hero_id),
-            Some(Position::Frontline)
+            Some(Position::FRONTLINE)
         );
         assert_eq!(
             formation.position_of(&back_hero_id),
-            Some(Position::Midline)
+            Some(Position::MIDLINE)
         );
     }
 
@@ -308,12 +327,12 @@ mod tests {
         let mut formation = two_hero_formation();
         let hero_id = hero_id("Mid");
 
-        let result = formation.move_to(&hero_id, Position::Backline);
+        let result = formation.move_to(&hero_id, Position::BACKLINE);
 
         assert!(result.is_ok());
-        assert_eq!(formation.hero_at(Position::Midline), None);
-        assert_eq!(formation.hero_at(Position::Backline), Some(&hero_id));
-        assert_eq!(formation.position_of(&hero_id), Some(Position::Backline));
+        assert_eq!(formation.hero_at(Position::MIDLINE), None);
+        assert_eq!(formation.hero_at(Position::BACKLINE), Some(&hero_id));
+        assert_eq!(formation.position_of(&hero_id), Some(Position::BACKLINE));
     }
 
     #[test]
@@ -321,11 +340,11 @@ mod tests {
         let mut formation = two_hero_formation();
         let hero_id = hero_id("Front");
 
-        let result = formation.move_to(&hero_id, Position::Frontline);
+        let result = formation.move_to(&hero_id, Position::FRONTLINE);
 
         assert!(result.is_ok());
-        assert_eq!(formation.hero_at(Position::Frontline), Some(&hero_id));
-        assert_eq!(formation.position_of(&hero_id), Some(Position::Frontline));
+        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&hero_id));
+        assert_eq!(formation.position_of(&hero_id), Some(Position::FRONTLINE));
     }
 
     #[test]
@@ -334,18 +353,18 @@ mod tests {
         let first_hero_id = hero_id("Front");
         let second_hero_id = hero_id("Mid");
 
-        let result = formation.move_to(&first_hero_id, Position::Midline);
+        let result = formation.move_to(&first_hero_id, Position::MIDLINE);
 
         assert!(matches!(result, Err(WorldError::PositionOccupied)));
-        assert_eq!(formation.hero_at(Position::Frontline), Some(&first_hero_id));
-        assert_eq!(formation.hero_at(Position::Midline), Some(&second_hero_id));
+        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&first_hero_id));
+        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&second_hero_id));
         assert_eq!(
             formation.position_of(&first_hero_id),
-            Some(Position::Frontline)
+            Some(Position::FRONTLINE)
         );
         assert_eq!(
             formation.position_of(&second_hero_id),
-            Some(Position::Midline)
+            Some(Position::MIDLINE)
         );
     }
 
@@ -355,10 +374,10 @@ mod tests {
         let missing_hero_id = hero_id("Missing");
         let front_hero_id = hero_id("Front");
 
-        let result = formation.move_to(&missing_hero_id, Position::Frontline);
+        let result = formation.move_to(&missing_hero_id, Position::FRONTLINE);
 
         assert!(matches!(result, Err(WorldError::HeroNotFound)));
-        assert_eq!(formation.hero_at(Position::Frontline), Some(&front_hero_id));
+        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&front_hero_id));
     }
 
     #[test]
@@ -371,17 +390,17 @@ mod tests {
 
         assert!(result.is_ok());
         assert_eq!(
-            formation.hero_at(Position::Frontline),
+            formation.hero_at(Position::FRONTLINE),
             Some(&second_hero_id)
         );
-        assert_eq!(formation.hero_at(Position::Midline), Some(&first_hero_id));
+        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&first_hero_id));
         assert_eq!(
             formation.position_of(&first_hero_id),
-            Some(Position::Midline)
+            Some(Position::MIDLINE)
         );
         assert_eq!(
             formation.position_of(&second_hero_id),
-            Some(Position::Frontline)
+            Some(Position::FRONTLINE)
         );
     }
 
@@ -394,7 +413,7 @@ mod tests {
         let result = formation.swap_with(&missing_hero_id, &present_hero_id);
 
         assert!(matches!(result, Err(WorldError::HeroNotFound)));
-        assert_eq!(formation.hero_at(Position::Midline), Some(&present_hero_id));
+        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&present_hero_id));
         assert_eq!(formation.position_of(&missing_hero_id), None);
     }
 
@@ -408,7 +427,7 @@ mod tests {
 
         assert!(matches!(result, Err(WorldError::HeroNotFound)));
         assert_eq!(
-            formation.hero_at(Position::Frontline),
+            formation.hero_at(Position::FRONTLINE),
             Some(&present_hero_id)
         );
         assert_eq!(formation.position_of(&missing_hero_id), None);

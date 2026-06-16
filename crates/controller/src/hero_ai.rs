@@ -5,7 +5,7 @@ use world::{Side, World};
 
 const INVALID_ACTION_SCORE: i32 = -1_000_000;
 
-const POSITION_ORDER: [Position; 3] = [Position::Frontline, Position::Midline, Position::Backline];
+const POSITION_ORDER: [Position; 3] = [Position::FRONTLINE, Position::MIDLINE, Position::BACKLINE];
 
 const ABILITY_ORDER: [AbilityId; 6] = [
     AbilityId::Fireball,
@@ -656,16 +656,24 @@ fn is_critical_health(hero: &Hero) -> bool {
 fn is_adjacent_position(from: Position, to: Position) -> bool {
     matches!(
         (from, to),
-        (Position::Frontline, Position::Midline)
-            | (Position::Midline, Position::Frontline)
-            | (Position::Midline, Position::Backline)
-            | (Position::Backline, Position::Midline)
+        (Position::FRONTLINE, Position::MIDLINE)
+            | (Position::MIDLINE, Position::FRONTLINE)
+            | (Position::MIDLINE, Position::BACKLINE)
+            | (Position::BACKLINE, Position::MIDLINE)
     )
 }
 
 #[cfg(test)]
 mod tests {
+    use world::formation::Lineup;
+
     use super::*;
+
+    fn empty_world() -> World {
+        let empty_lineup = || Lineup::with_position_count(Vec::new(), Position::all().len());
+
+        World::new(empty_lineup(), empty_lineup())
+    }
 
     fn context<'a>(
         actor: &'a Hero,
@@ -689,17 +697,17 @@ mod tests {
         let actor = Hero::mage();
         let mut weak_enemy = Hero::warrior();
         let healthy_enemy = Hero::warrior();
-        let mut world = World::new();
+        let mut world = empty_world();
 
         weak_enemy.take_damage(95);
         world
-            .place(Side::Left, &actor.id, Position::Backline)
+            .place(Side::Left, &actor.id, Position::BACKLINE)
             .expect("actor placement should succeed");
         world
-            .place(Side::Right, &healthy_enemy.id, Position::Frontline)
+            .place(Side::Right, &healthy_enemy.id, Position::FRONTLINE)
             .expect("healthy enemy placement should succeed");
         world
-            .place(Side::Right, &weak_enemy.id, Position::Backline)
+            .place(Side::Right, &weak_enemy.id, Position::BACKLINE)
             .expect("weak enemy placement should succeed");
 
         let ctx = context(
@@ -723,11 +731,11 @@ mod tests {
     #[test]
     fn chooses_bandage_for_critical_actor_when_no_enemy_is_available() {
         let mut actor = Hero::warrior();
-        let mut world = World::new();
+        let mut world = empty_world();
 
         actor.take_damage(80);
         world
-            .place(Side::Left, &actor.id, Position::Frontline)
+            .place(Side::Left, &actor.id, Position::FRONTLINE)
             .expect("actor placement should succeed");
 
         let ctx = context(&actor, &world, Side::Left, vec![&actor]);
@@ -741,13 +749,13 @@ mod tests {
     fn chooses_move_when_a_better_position_unlocks_stronger_actions() {
         let actor = Hero::mage();
         let enemy = Hero::warrior();
-        let mut world = World::new();
+        let mut world = empty_world();
 
         world
-            .place(Side::Left, &actor.id, Position::Frontline)
+            .place(Side::Left, &actor.id, Position::FRONTLINE)
             .expect("actor placement should succeed");
         world
-            .place(Side::Right, &enemy.id, Position::Frontline)
+            .place(Side::Right, &enemy.id, Position::FRONTLINE)
             .expect("enemy placement should succeed");
 
         let ctx = context(&actor, &world, Side::Left, vec![&actor, &enemy]);
@@ -757,7 +765,7 @@ mod tests {
         assert_eq!(
             action,
             TurnAction::Move {
-                to: Position::Midline,
+                to: Position::MIDLINE,
             }
         );
     }

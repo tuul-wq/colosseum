@@ -1,5 +1,8 @@
-pub mod battle;
-pub mod events;
+mod arena;
+mod events;
+mod lineup;
+mod setup;
 
-pub use battle::{Arena, ArenaLineup};
+pub use arena::Arena;
 pub use events::BattleEvent;
+pub use setup::ArenaSetup;

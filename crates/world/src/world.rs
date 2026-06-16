@@ -102,10 +102,7 @@ mod tests {
     }
 
     fn lineup(first: &str, second: &str) -> Lineup {
-        Lineup::Two {
-            frontline: hero_id(first),
-            midline: hero_id(second),
-        }
+        Lineup::with_position_count(vec![hero_id(first), hero_id(second)], Position::all().len())
     }
 
     fn world() -> World {
@@ -124,23 +121,23 @@ mod tests {
         let right_mid_hero_id = hero_id("RightMid");
 
         assert_eq!(
-            world.hero_at(Side::Left, Position::Frontline),
+            world.hero_at(Side::Left, Position::FRONTLINE),
             Some(&left_front_hero_id)
         );
         assert_eq!(
-            world.hero_at(Side::Left, Position::Midline),
+            world.hero_at(Side::Left, Position::MIDLINE),
             Some(&left_mid_hero_id)
         );
-        assert_eq!(world.hero_at(Side::Left, Position::Backline), None);
+        assert_eq!(world.hero_at(Side::Left, Position::BACKLINE), None);
         assert_eq!(
-            world.hero_at(Side::Right, Position::Frontline),
+            world.hero_at(Side::Right, Position::FRONTLINE),
             Some(&right_front_hero_id)
         );
         assert_eq!(
-            world.hero_at(Side::Right, Position::Midline),
+            world.hero_at(Side::Right, Position::MIDLINE),
             Some(&right_mid_hero_id)
         );
-        assert_eq!(world.hero_at(Side::Right, Position::Backline), None);
+        assert_eq!(world.hero_at(Side::Right, Position::BACKLINE), None);
     }
 
     #[test]
@@ -148,18 +145,18 @@ mod tests {
         let mut world = world();
         let hero_id = hero_id("LeftBack");
 
-        let result = world.place(Side::Left, &hero_id, Position::Backline);
+        let result = world.place(Side::Left, &hero_id, Position::BACKLINE);
 
         assert!(result.is_ok());
         assert_eq!(
-            world.hero_at(Side::Left, Position::Backline),
+            world.hero_at(Side::Left, Position::BACKLINE),
             Some(&hero_id)
         );
         assert_eq!(
             world.position_of(Side::Left, &hero_id),
-            Some(Position::Backline)
+            Some(Position::BACKLINE)
         );
-        assert_eq!(world.hero_at(Side::Right, Position::Backline), None);
+        assert_eq!(world.hero_at(Side::Right, Position::BACKLINE), None);
         assert_eq!(world.position_of(Side::Right, &hero_id), None);
     }
 
@@ -172,15 +169,15 @@ mod tests {
         let result = world.remove(Side::Left, &left_hero_id);
 
         assert!(result.is_ok());
-        assert_eq!(world.hero_at(Side::Left, Position::Midline), None);
+        assert_eq!(world.hero_at(Side::Left, Position::MIDLINE), None);
         assert_eq!(world.position_of(Side::Left, &left_hero_id), None);
         assert_eq!(
-            world.hero_at(Side::Right, Position::Midline),
+            world.hero_at(Side::Right, Position::MIDLINE),
             Some(&right_hero_id)
         );
         assert_eq!(
             world.position_of(Side::Right, &right_hero_id),
-            Some(Position::Midline)
+            Some(Position::MIDLINE)
         );
     }
 
@@ -190,23 +187,23 @@ mod tests {
         let left_hero_id = hero_id("LeftMid");
         let right_hero_id = hero_id("RightMid");
 
-        let result = world.move_to(Side::Left, &left_hero_id, Position::Backline);
+        let result = world.move_to(Side::Left, &left_hero_id, Position::BACKLINE);
 
         assert!(result.is_ok());
-        assert_eq!(world.hero_at(Side::Left, Position::Midline), None);
+        assert_eq!(world.hero_at(Side::Left, Position::MIDLINE), None);
         assert_eq!(
-            world.hero_at(Side::Left, Position::Backline),
+            world.hero_at(Side::Left, Position::BACKLINE),
             Some(&left_hero_id)
         );
         assert_eq!(
             world.position_of(Side::Left, &left_hero_id),
-            Some(Position::Backline)
+            Some(Position::BACKLINE)
         );
         assert_eq!(
-            world.hero_at(Side::Right, Position::Midline),
+            world.hero_at(Side::Right, Position::MIDLINE),
             Some(&right_hero_id)
         );
-        assert_eq!(world.hero_at(Side::Right, Position::Backline), None);
+        assert_eq!(world.hero_at(Side::Right, Position::BACKLINE), None);
     }
 
     #[test]
@@ -220,23 +217,23 @@ mod tests {
 
         assert!(result.is_ok());
         assert_eq!(
-            world.hero_at(Side::Left, Position::Frontline),
+            world.hero_at(Side::Left, Position::FRONTLINE),
             Some(&second_hero_id)
         );
         assert_eq!(
-            world.hero_at(Side::Left, Position::Midline),
+            world.hero_at(Side::Left, Position::MIDLINE),
             Some(&first_hero_id)
         );
         assert_eq!(
             world.position_of(Side::Left, &first_hero_id),
-            Some(Position::Midline)
+            Some(Position::MIDLINE)
         );
         assert_eq!(
             world.position_of(Side::Left, &second_hero_id),
-            Some(Position::Frontline)
+            Some(Position::FRONTLINE)
         );
         assert_eq!(
-            world.hero_at(Side::Right, Position::Frontline),
+            world.hero_at(Side::Right, Position::FRONTLINE),
             Some(&right_hero_id)
         );
     }
@@ -247,16 +244,16 @@ mod tests {
         let first_hero_id = hero_id("LeftFront");
         let second_hero_id = hero_id("Second");
 
-        let result = world.place(Side::Left, &second_hero_id, Position::Frontline);
+        let result = world.place(Side::Left, &second_hero_id, Position::FRONTLINE);
 
         assert!(matches!(result, Err(WorldError::PositionOccupied)));
         assert_eq!(
-            world.hero_at(Side::Left, Position::Frontline),
+            world.hero_at(Side::Left, Position::FRONTLINE),
             Some(&first_hero_id)
         );
         assert_eq!(world.position_of(Side::Left, &second_hero_id), None);
         assert_eq!(
-            world.hero_at(Side::Right, Position::Frontline),
+            world.hero_at(Side::Right, Position::FRONTLINE),
             Some(&hero_id("RightFront"))
         );
     }

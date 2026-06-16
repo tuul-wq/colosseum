@@ -33,6 +33,13 @@ pub struct Health {
 }
 
 impl Hero {
+    pub fn new(class: HeroClass) -> Self {
+        match class {
+            HeroClass::Mage => Self::mage(),
+            HeroClass::Warrior => Self::warrior(),
+        }
+    }
+
     pub fn take_damage(&mut self, damage: u8) {
         self.health.current = self.health.current.saturating_sub(damage);
     }
