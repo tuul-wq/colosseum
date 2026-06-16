@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use domain::{Hero, HeroClass, HeroId};
+use domain::{Hero, HeroId};
 use world::World;
 
 use crate::lineup::ArenaLineup;
@@ -13,7 +13,7 @@ pub struct Arena {
 
 impl Arena {
     pub fn new(setup: ArenaSetup) -> Self {
-        let arena_lineup = ArenaLineup::from_setup(setup);
+        let arena_lineup = ArenaLineup::new(setup);
         let (left_team, right_team) = arena_lineup.to_world_lineups();
 
         Self {
@@ -21,28 +21,20 @@ impl Arena {
             heroes: arena_lineup.all_heroes(),
         }
     }
-
-    pub fn two_vs_two(left: [HeroClass; 2], right: [HeroClass; 2]) -> Self {
-        Self::new(ArenaSetup::TwoVsTwo { left, right })
-    }
-
-    pub fn three_vs_three(left: [HeroClass; 3], right: [HeroClass; 3]) -> Self {
-        Self::new(ArenaSetup::ThreeVsThree { left, right })
-    }
 }
 
 #[cfg(test)]
 mod tests {
-    use domain::Position;
+    use domain::{HeroClass, Position};
     use world::Side;
 
     use super::*;
 
     #[test]
     fn new_creates_heroes_from_setup_classes() {
-        let arena = Arena::new(ArenaSetup::TwoVsTwo {
-            left: [HeroClass::Mage, HeroClass::Warrior],
-            right: [HeroClass::Warrior, HeroClass::Mage],
+        let arena = Arena::new(ArenaSetup {
+            left: [HeroClass::Mage, HeroClass::Warrior, HeroClass::Warrior],
+            right: [HeroClass::Warrior, HeroClass::Mage, HeroClass::Warrior],
         });
 
         let left_frontline = arena
@@ -62,12 +54,12 @@ mod tests {
             arena.heroes.get(right_midline).map(|hero| hero.class),
             Some(HeroClass::Mage)
         ));
-        assert_eq!(arena.heroes.len(), 4);
+        assert_eq!(arena.heroes.len(), 6);
     }
 
     #[test]
     fn new_places_three_vs_three_backline_heroes() {
-        let arena = Arena::new(ArenaSetup::ThreeVsThree {
+        let arena = Arena::new(ArenaSetup {
             left: [HeroClass::Warrior, HeroClass::Warrior, HeroClass::Mage],
             right: [HeroClass::Mage, HeroClass::Warrior, HeroClass::Warrior],
         });

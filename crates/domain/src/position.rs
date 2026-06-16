@@ -1,28 +1,32 @@
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Position(usize);
+pub enum Position {
+    Frontline,
+    Midline,
+    Backline,
+}
 
 impl Position {
-    pub const FRONTLINE: Self = Self(0);
-    pub const MIDLINE: Self = Self(1);
-    pub const BACKLINE: Self = Self(2);
-
-    pub fn new(index: usize) -> Self {
-        Self(index)
-    }
+    pub const FRONTLINE: Self = Self::Frontline;
+    pub const MIDLINE: Self = Self::Midline;
+    pub const BACKLINE: Self = Self::Backline;
 
     pub fn index(self) -> usize {
-        self.0
+        match self {
+            Self::Frontline => 0,
+            Self::Midline => 1,
+            Self::Backline => 2,
+        }
+    }
+
+    pub fn ordered() -> [Self; 3] {
+        [Self::Frontline, Self::Midline, Self::Backline]
     }
 
     /// Returns Frontline, Midline, and Backline positions.
     pub fn all() -> HashSet<Self> {
-        HashSet::from([Self::FRONTLINE, Self::MIDLINE, Self::BACKLINE])
-    }
-
-    pub fn range(count: usize) -> impl Iterator<Item = Self> {
-        (0..count).map(Self::new)
+        HashSet::from(Self::ordered())
     }
 
     /// Returns Frontline and Midline positions.

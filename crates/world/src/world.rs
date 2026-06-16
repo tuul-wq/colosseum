@@ -101,14 +101,14 @@ mod tests {
         HeroId::new(name)
     }
 
-    fn lineup(first: &str, second: &str) -> Lineup {
-        Lineup::with_position_count(vec![hero_id(first), hero_id(second)], Position::all().len())
+    fn lineup(first: &str, second: &str, third: &str) -> Lineup {
+        Lineup::new(hero_id(first), hero_id(second), hero_id(third))
     }
 
     fn world() -> World {
         World::new(
-            lineup("LeftFront", "LeftMid"),
-            lineup("RightFront", "RightMid"),
+            lineup("LeftFront", "LeftMid", "LeftBack"),
+            lineup("RightFront", "RightMid", "RightBack"),
         )
     }
 
@@ -117,8 +117,10 @@ mod tests {
         let world = world();
         let left_front_hero_id = hero_id("LeftFront");
         let left_mid_hero_id = hero_id("LeftMid");
+        let left_back_hero_id = hero_id("LeftBack");
         let right_front_hero_id = hero_id("RightFront");
         let right_mid_hero_id = hero_id("RightMid");
+        let right_back_hero_id = hero_id("RightBack");
 
         assert_eq!(
             world.hero_at(Side::Left, Position::FRONTLINE),
@@ -128,7 +130,10 @@ mod tests {
             world.hero_at(Side::Left, Position::MIDLINE),
             Some(&left_mid_hero_id)
         );
-        assert_eq!(world.hero_at(Side::Left, Position::BACKLINE), None);
+        assert_eq!(
+            world.hero_at(Side::Left, Position::BACKLINE),
+            Some(&left_back_hero_id)
+        );
         assert_eq!(
             world.hero_at(Side::Right, Position::FRONTLINE),
             Some(&right_front_hero_id)
@@ -137,47 +142,58 @@ mod tests {
             world.hero_at(Side::Right, Position::MIDLINE),
             Some(&right_mid_hero_id)
         );
-        assert_eq!(world.hero_at(Side::Right, Position::BACKLINE), None);
+        assert_eq!(
+            world.hero_at(Side::Right, Position::BACKLINE),
+            Some(&right_back_hero_id)
+        );
     }
 
     #[test]
     fn place_stores_hero_on_selected_side_only() {
         let mut world = world();
-        let hero_id = hero_id("LeftBack");
+        let old_back_hero_id = hero_id("LeftBack");
+        let new_back_hero_id = hero_id("NewLeftBack");
 
-        let result = world.place(Side::Left, &hero_id, Position::BACKLINE);
+        world
+            .remove(Side::Left, &old_back_hero_id)
+            .expect("left back removal should succeed");
+
+        let result = world.place(Side::Left, &new_back_hero_id, Position::BACKLINE);
 
         assert!(result.is_ok());
         assert_eq!(
             world.hero_at(Side::Left, Position::BACKLINE),
-            Some(&hero_id)
+            Some(&new_back_hero_id)
         );
         assert_eq!(
-            world.position_of(Side::Left, &hero_id),
+            world.position_of(Side::Left, &new_back_hero_id),
             Some(Position::BACKLINE)
         );
-        assert_eq!(world.hero_at(Side::Right, Position::BACKLINE), None);
-        assert_eq!(world.position_of(Side::Right, &hero_id), None);
+        assert_eq!(
+            world.hero_at(Side::Right, Position::BACKLINE),
+            Some(&hero_id("RightBack"))
+        );
+        assert_eq!(world.position_of(Side::Right, &new_back_hero_id), None);
     }
 
     #[test]
     fn remove_clears_hero_from_selected_side_only() {
         let mut world = world();
-        let left_hero_id = hero_id("LeftMid");
-        let right_hero_id = hero_id("RightMid");
+        let left_hero_id = hero_id("LeftBack");
+        let right_hero_id = hero_id("RightBack");
 
         let result = world.remove(Side::Left, &left_hero_id);
 
         assert!(result.is_ok());
-        assert_eq!(world.hero_at(Side::Left, Position::MIDLINE), None);
+        assert_eq!(world.hero_at(Side::Left, Position::BACKLINE), None);
         assert_eq!(world.position_of(Side::Left, &left_hero_id), None);
         assert_eq!(
-            world.hero_at(Side::Right, Position::MIDLINE),
+            world.hero_at(Side::Right, Position::BACKLINE),
             Some(&right_hero_id)
         );
         assert_eq!(
             world.position_of(Side::Right, &right_hero_id),
-            Some(Position::MIDLINE)
+            Some(Position::BACKLINE)
         );
     }
 
@@ -185,7 +201,12 @@ mod tests {
     fn move_to_moves_hero_on_selected_side_only() {
         let mut world = world();
         let left_hero_id = hero_id("LeftMid");
+        let left_back_hero_id = hero_id("LeftBack");
         let right_hero_id = hero_id("RightMid");
+
+        world
+            .remove(Side::Left, &left_back_hero_id)
+            .expect("left back removal should succeed");
 
         let result = world.move_to(Side::Left, &left_hero_id, Position::BACKLINE);
 
@@ -203,7 +224,10 @@ mod tests {
             world.hero_at(Side::Right, Position::MIDLINE),
             Some(&right_hero_id)
         );
-        assert_eq!(world.hero_at(Side::Right, Position::BACKLINE), None);
+        assert_eq!(
+            world.hero_at(Side::Right, Position::BACKLINE),
+            Some(&hero_id("RightBack"))
+        );
     }
 
     #[test]

@@ -1,40 +1,20 @@
-use std::fmt;
 use std::str::FromStr;
 
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 
 #[derive(Debug, Parser)]
 #[command(arg_required_else_help = true)]
 pub struct Cli {
-    #[arg(value_enum, value_name = "lineup")]
-    pub lineup: LineupArg,
     #[arg(
         value_name = "team-1",
-        help = "Comma-separated heroes, e.g. mage,warrior"
+        help = "Comma-separated 3-hero team, e.g. mage,warrior,archer"
     )]
     pub team_1: TeamArg,
     #[arg(
         value_name = "team-2",
-        help = "Comma-separated heroes, e.g. warrior,mage"
+        help = "Comma-separated 3-hero team, e.g. warrior,mage,archer"
     )]
     pub team_2: TeamArg,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
-pub enum LineupArg {
-    #[value(name = "2v2")]
-    TwoVsTwo,
-    #[value(name = "3v3")]
-    ThreeVsThree,
-}
-
-impl fmt::Display for LineupArg {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::TwoVsTwo => f.write_str("2v2"),
-            Self::ThreeVsThree => f.write_str("3v3"),
-        }
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -87,16 +67,23 @@ mod tests {
 
     #[test]
     fn parses_cli_arguments() {
-        let cli = Cli::try_parse_from(["cli", "2v2", "mage,warrior", "warrior,mage"]).unwrap();
+        let cli =
+            Cli::try_parse_from(["cli", "mage,warrior,mage", "warrior,mage,warrior"]).unwrap();
 
-        assert_eq!(cli.lineup, LineupArg::TwoVsTwo);
-        assert_eq!(cli.team_1.heroes, [HeroArg::Mage, HeroArg::Warrior]);
-        assert_eq!(cli.team_2.heroes, [HeroArg::Warrior, HeroArg::Mage]);
+        assert_eq!(
+            cli.team_1.heroes,
+            [HeroArg::Mage, HeroArg::Warrior, HeroArg::Mage]
+        );
+        assert_eq!(
+            cli.team_2.heroes,
+            [HeroArg::Warrior, HeroArg::Mage, HeroArg::Warrior]
+        );
     }
 
     #[test]
     fn rejects_unknown_hero_values() {
-        let error = Cli::try_parse_from(["cli", "2v2", "rogue,mage", "warrior,mage"]).unwrap_err();
+        let error =
+            Cli::try_parse_from(["cli", "rogue,mage,mage", "warrior,mage,mage"]).unwrap_err();
 
         assert_eq!(error.kind(), ErrorKind::ValueValidation);
     }

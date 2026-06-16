@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use domain::{Hero, HeroClass, HeroId, Position};
 use world::Lineup as FormationLineup;
 
-use crate::setup::{ArenaSetup, Layout, TeamSetup};
+use crate::setup::ArenaSetup;
 
 pub struct ArenaLineup {
     left: TeamLineup,
@@ -11,25 +11,10 @@ pub struct ArenaLineup {
 }
 
 impl ArenaLineup {
-    pub fn from_setup(setup: ArenaSetup) -> Self {
-        match setup {
-            ArenaSetup::TwoVsTwo { left, right } => Self::new(
-                TeamSetup::new(Layout::Two, left),
-                TeamSetup::new(Layout::Two, right),
-            ),
-            ArenaSetup::ThreeVsThree { left, right } => Self::new(
-                TeamSetup::new(Layout::Three, left),
-                TeamSetup::new(Layout::Three, right),
-            ),
-        }
-    }
-
-    pub fn new<const L: usize, const R: usize>(left: TeamSetup<L>, right: TeamSetup<R>) -> Self {
-        assert_eq!(left.layout, right.layout);
-
+    pub fn new(setup: ArenaSetup) -> Self {
         Self {
-            left: TeamLineup::from_setup(left),
-            right: TeamLineup::from_setup(right),
+            left: TeamLineup::new(setup.left),
+            right: TeamLineup::new(setup.right),
         }
     }
 
@@ -51,12 +36,11 @@ struct TeamLineup {
 }
 
 impl TeamLineup {
-    fn from_setup<const N: usize>(setup: TeamSetup<N>) -> Self {
-        assert_eq!(setup.layout.position_count(), setup.classes.len());
-
+    fn new(classes: [HeroClass; 3]) -> Self {
         Self {
-            slots: Position::range(setup.layout.position_count())
-                .zip(setup.classes)
+            slots: Position::ordered()
+                .into_iter()
+                .zip(classes)
                 .map(|(position, class)| HeroSlot::new(position, class))
                 .collect(),
         }
@@ -66,7 +50,12 @@ impl TeamLineup {
         let mut slots = self.slots.iter().collect::<Vec<_>>();
         slots.sort_by_key(|slot| slot.position.index());
 
-        FormationLineup::new(slots.into_iter().map(|slot| slot.hero.id.clone()).collect())
+        let heroes = slots
+            .into_iter()
+            .map(|slot| slot.hero.id.clone())
+            .collect::<Vec<_>>();
+
+        FormationLineup::new(heroes[0].clone(), heroes[1].clone(), heroes[2].clone())
     }
 
     fn into_heroes(self) -> impl Iterator<Item = Hero> {

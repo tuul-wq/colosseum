@@ -670,9 +670,30 @@ mod tests {
     use super::*;
 
     fn empty_world() -> World {
-        let empty_lineup = || Lineup::with_position_count(Vec::new(), Position::all().len());
+        let left = [
+            HeroId::new("LeftEmptyFront"),
+            HeroId::new("LeftEmptyMid"),
+            HeroId::new("LeftEmptyBack"),
+        ];
+        let right = [
+            HeroId::new("RightEmptyFront"),
+            HeroId::new("RightEmptyMid"),
+            HeroId::new("RightEmptyBack"),
+        ];
+        let mut world = World::new(Lineup::from(left.clone()), Lineup::from(right.clone()));
 
-        World::new(empty_lineup(), empty_lineup())
+        for hero_id in left {
+            world
+                .remove(Side::Left, &hero_id)
+                .expect("placeholder removal should succeed");
+        }
+        for hero_id in right {
+            world
+                .remove(Side::Right, &hero_id)
+                .expect("placeholder removal should succeed");
+        }
+
+        world
     }
 
     fn context<'a>(

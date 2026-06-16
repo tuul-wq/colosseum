@@ -2,33 +2,20 @@ use arena::ArenaSetup;
 use clap::{CommandFactory, error::ErrorKind};
 use domain::HeroClass;
 
-use crate::arguments::{Cli, HeroArg, LineupArg, TeamArg};
+use crate::arguments::{Cli, HeroArg, TeamArg};
 
 pub fn from_cli(cli: Cli) -> Result<ArenaSetup, clap::Error> {
-    match cli.lineup {
-        LineupArg::TwoVsTwo => Ok(ArenaSetup::TwoVsTwo {
-            left: into_classes(cli.team_1, "team-1", cli.lineup)?,
-            right: into_classes(cli.team_2, "team-2", cli.lineup)?,
-        }),
-        LineupArg::ThreeVsThree => Ok(ArenaSetup::ThreeVsThree {
-            left: into_classes(cli.team_1, "team-1", cli.lineup)?,
-            right: into_classes(cli.team_2, "team-2", cli.lineup)?,
-        }),
-    }
+    Ok(ArenaSetup {
+        left: into_classes(cli.team_1, "team-1")?,
+        right: into_classes(cli.team_2, "team-2")?,
+    })
 }
 
-fn into_classes<const N: usize>(
-    team: TeamArg,
-    team_name: &'static str,
-    lineup: LineupArg,
-) -> Result<[HeroClass; N], clap::Error> {
-    let heroes: [HeroArg; N] = team.heroes.try_into().map_err(|heroes: Vec<HeroArg>| {
+fn into_classes(team: TeamArg, team_name: &'static str) -> Result<[HeroClass; 3], clap::Error> {
+    let heroes: [HeroArg; 3] = team.heroes.try_into().map_err(|heroes: Vec<HeroArg>| {
         Cli::command().error(
             ErrorKind::ValueValidation,
-            format!(
-                "{lineup} expects {N} heroes in {team_name}, got {}",
-                heroes.len()
-            ),
+            format!("3v3 expects 3 heroes in {team_name}, got {}", heroes.len()),
         )
     })?;
 
@@ -44,28 +31,30 @@ fn hero_class(hero: HeroArg) -> HeroClass {
 
 #[cfg(test)]
 mod tests {
-    use arena::ArenaSetup;
     use clap::Parser;
 
     use super::*;
 
     #[test]
-    fn builds_two_vs_two_setup_from_cli() {
-        let cli = Cli::try_parse_from(["cli", "2v2", "mage,warrior", "warrior,mage"]).unwrap();
+    fn builds_setup_from_cli() {
+        let cli =
+            Cli::try_parse_from(["cli", "mage,warrior,mage", "warrior,mage,warrior"]).unwrap();
 
         let setup = from_cli(cli).unwrap();
 
-        let ArenaSetup::TwoVsTwo { left, right } = setup else {
-            panic!("expected 2v2 setup");
-        };
-
-        assert_eq!(left, [HeroClass::Mage, HeroClass::Warrior]);
-        assert_eq!(right, [HeroClass::Warrior, HeroClass::Mage]);
+        assert_eq!(
+            setup.left,
+            [HeroClass::Mage, HeroClass::Warrior, HeroClass::Mage]
+        );
+        assert_eq!(
+            setup.right,
+            [HeroClass::Warrior, HeroClass::Mage, HeroClass::Warrior]
+        );
     }
 
     #[test]
     fn validates_team_size_against_lineup() {
-        let cli = Cli::try_parse_from(["cli", "3v3", "mage,warrior", "warrior,mage,mage"]).unwrap();
+        let cli = Cli::try_parse_from(["cli", "mage,warrior", "warrior,mage,mage"]).unwrap();
 
         let Err(error) = from_cli(cli) else {
             panic!("expected invalid team size");

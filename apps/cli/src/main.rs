@@ -7,7 +7,8 @@ mod arena_setup;
 mod arguments;
 
 fn main() {
-    let setup = arena_setup::from_cli(Cli::parse()).unwrap_or_else(|error| error.exit());
+    let setup =
+        arena_setup::from_cli(Cli::parse()).unwrap_or_else(|error: clap::Error| error.exit());
 
     Arena::new(setup);
 }
