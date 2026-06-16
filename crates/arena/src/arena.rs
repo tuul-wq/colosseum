@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use domain::{Hero, HeroClass, HeroId};
 use world::World;
 
+use crate::lineup::ArenaLineup;
 use crate::setup::ArenaSetup;
 
 pub struct Arena {
@@ -12,7 +13,7 @@ pub struct Arena {
 
 impl Arena {
     pub fn new(setup: ArenaSetup) -> Self {
-        let arena_lineup = setup.into_lineup();
+        let arena_lineup = ArenaLineup::from_setup(setup);
         let (left_team, right_team) = arena_lineup.to_world_lineups();
 
         Self {

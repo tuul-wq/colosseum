@@ -1,5 +1,4 @@
-use domain::abilities::AbilityId;
-use domain::heroes::HeroId;
+use domain::{AbilityId, HeroId};
 
 pub enum BattleEvent {
     GameStarted {

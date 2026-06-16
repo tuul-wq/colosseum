@@ -1,5 +1,4 @@
-use domain::heroes::HeroId;
-use domain::position::Position;
+use domain::{HeroId, Position};
 
 use crate::errors::WorldError;
 

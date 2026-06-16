@@ -665,7 +665,7 @@ fn is_adjacent_position(from: Position, to: Position) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use world::formation::Lineup;
+    use world::Lineup;
 
     use super::*;
 

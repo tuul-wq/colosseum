@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
 use domain::{Hero, HeroClass, HeroId, Position};
-use world::formation::Lineup as FormationLineup;
+use world::Lineup as FormationLineup;
 
-use crate::setup::TeamSetup;
+use crate::setup::{ArenaSetup, Layout, TeamSetup};
 
 pub struct ArenaLineup {
     left: TeamLineup,
@@ -11,8 +11,21 @@ pub struct ArenaLineup {
 }
 
 impl ArenaLineup {
+    pub fn from_setup(setup: ArenaSetup) -> Self {
+        match setup {
+            ArenaSetup::TwoVsTwo { left, right } => Self::new(
+                TeamSetup::new(Layout::Two, left),
+                TeamSetup::new(Layout::Two, right),
+            ),
+            ArenaSetup::ThreeVsThree { left, right } => Self::new(
+                TeamSetup::new(Layout::Three, left),
+                TeamSetup::new(Layout::Three, right),
+            ),
+        }
+    }
+
     pub fn new<const L: usize, const R: usize>(left: TeamSetup<L>, right: TeamSetup<R>) -> Self {
-        assert_eq!(left.layout(), right.layout());
+        assert_eq!(left.layout, right.layout);
 
         Self {
             left: TeamLineup::from_setup(left),
@@ -39,14 +52,11 @@ struct TeamLineup {
 
 impl TeamLineup {
     fn from_setup<const N: usize>(setup: TeamSetup<N>) -> Self {
-        let layout = setup.layout();
-        let classes = setup.classes();
-
-        assert_eq!(layout.position_count(), classes.len());
+        assert_eq!(setup.layout.position_count(), setup.classes.len());
 
         Self {
-            slots: Position::range(layout.position_count())
-                .zip(classes)
+            slots: Position::range(setup.layout.position_count())
+                .zip(setup.classes)
                 .map(|(position, class)| HeroSlot::new(position, class))
                 .collect(),
         }

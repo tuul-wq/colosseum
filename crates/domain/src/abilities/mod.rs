@@ -1,10 +1,28 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
-pub mod general;
-pub mod mage;
-pub mod warrior;
+mod general;
+mod mage;
+mod warrior;
 
 use crate::position::Position;
+
+pub fn mage_abilities() -> HashMap<AbilityId, Ability> {
+    HashMap::from([
+        (AbilityId::MainAttack, mage::mage_main_attack(5)),
+        (AbilityId::OffhandAttack, mage::mage_offhand_attack(3)),
+        (AbilityId::Fireball, mage::fireball()),
+        (AbilityId::ArcaneExplosion, mage::arcane_explosion()),
+    ])
+}
+
+pub fn warrior_abilities() -> HashMap<AbilityId, Ability> {
+    HashMap::from([
+        (AbilityId::MainAttack, warrior::warrior_main_attack(9)),
+        (AbilityId::OffhandAttack, warrior::warrior_offhand_attack(5)),
+        (AbilityId::Slam, warrior::slam()),
+        (AbilityId::Whirlwind, warrior::whirlwind()),
+    ])
+}
 
 #[derive(Debug)]
 pub struct Ability {

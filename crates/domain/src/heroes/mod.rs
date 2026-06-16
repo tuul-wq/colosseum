@@ -1,6 +1,6 @@
-pub mod class;
-pub mod mage;
-pub mod warrior;
+mod class;
+mod mage;
+mod warrior;
 
 pub use crate::heroes::class::HeroClass;
 
