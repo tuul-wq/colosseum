@@ -5,7 +5,8 @@ use world::{Side, World};
 
 const INVALID_ACTION_SCORE: i32 = -1_000_000;
 
-const POSITION_ORDER: [Position; 3] = [Position::FRONTLINE, Position::MIDLINE, Position::BACKLINE];
+const POSITION_ORDER: [Position; Position::COUNT] =
+    [Position::FRONTLINE, Position::MIDLINE, Position::BACKLINE];
 
 const ABILITY_ORDER: [AbilityId; 6] = [
     AbilityId::Fireball,

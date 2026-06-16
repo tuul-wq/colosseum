@@ -36,7 +36,7 @@ struct TeamLineup {
 }
 
 impl TeamLineup {
-    fn new(classes: [HeroClass; 3]) -> Self {
+    fn new(classes: [HeroClass; Position::COUNT]) -> Self {
         Self {
             slots: Position::ordered()
                 .into_iter()

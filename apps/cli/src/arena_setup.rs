@@ -1,6 +1,6 @@
 use arena::ArenaSetup;
 use clap::{CommandFactory, error::ErrorKind};
-use domain::HeroClass;
+use domain::{HeroClass, Position};
 
 use crate::arguments::{Cli, HeroArg, TeamArg};
 
@@ -11,13 +11,17 @@ pub fn from_cli(cli: Cli) -> Result<ArenaSetup, clap::Error> {
     })
 }
 
-fn into_classes(team: TeamArg, team_name: &'static str) -> Result<[HeroClass; 3], clap::Error> {
-    let heroes: [HeroArg; 3] = team.heroes.try_into().map_err(|heroes: Vec<HeroArg>| {
-        Cli::command().error(
-            ErrorKind::ValueValidation,
-            format!("3v3 expects 3 heroes in {team_name}, got {}", heroes.len()),
-        )
-    })?;
+fn into_classes(
+    team: TeamArg,
+    team_name: &'static str,
+) -> Result<[HeroClass; Position::COUNT], clap::Error> {
+    let heroes: [HeroArg; Position::COUNT] =
+        team.heroes.try_into().map_err(|heroes: Vec<HeroArg>| {
+            Cli::command().error(
+                ErrorKind::ValueValidation,
+                format!("3v3 expects 3 heroes in {team_name}, got {}", heroes.len()),
+            )
+        })?;
 
     Ok(heroes.map(hero_class))
 }

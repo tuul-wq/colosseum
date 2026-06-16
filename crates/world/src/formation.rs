@@ -4,7 +4,7 @@ use crate::errors::WorldError;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Formation {
-    slots: [Option<HeroId>; 3],
+    slots: [Option<HeroId>; Position::COUNT],
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -24,8 +24,8 @@ impl Lineup {
     }
 }
 
-impl From<[HeroId; 3]> for Lineup {
-    fn from([frontline, midline, backline]: [HeroId; 3]) -> Self {
+impl From<[HeroId; Position::COUNT]> for Lineup {
+    fn from([frontline, midline, backline]: [HeroId; Position::COUNT]) -> Self {
         Self::new(frontline, midline, backline)
     }
 }

@@ -8,6 +8,9 @@ pub enum Position {
 }
 
 impl Position {
+    /// Amount of positions per side
+    pub const COUNT: usize = 3;
+
     pub const FRONTLINE: Self = Self::Frontline;
     pub const MIDLINE: Self = Self::Midline;
     pub const BACKLINE: Self = Self::Backline;
@@ -20,7 +23,7 @@ impl Position {
         }
     }
 
-    pub fn ordered() -> [Self; 3] {
+    pub fn ordered() -> [Self; Self::COUNT] {
         [Self::Frontline, Self::Midline, Self::Backline]
     }
 

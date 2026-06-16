@@ -1,7 +1,7 @@
-use domain::HeroClass;
+use domain::{HeroClass, Position};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ArenaSetup {
-    pub left: [HeroClass; 3],
-    pub right: [HeroClass; 3],
+    pub left: [HeroClass; Position::COUNT],
+    pub right: [HeroClass; Position::COUNT],
 }
