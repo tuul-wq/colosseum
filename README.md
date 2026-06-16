@@ -13,7 +13,7 @@ Colosseum is built as a backend/systems project first: domain modeling, turn log
 - World state for two opposing sides
 - Movement, placement, removal, and ally swapping logic
 - Early `HeroAI` decision interface
-- Starter CLI with a `fight` command
+- Starter CLI for creating two 3-hero teams
 
 ## Roadmap
 
@@ -30,8 +30,7 @@ Colosseum is built as a backend/systems project first: domain modeling, turn log
 ## Run
 
 ```bash
-cargo run -p cli -- 2v2 mage,warrior warrior,mage
-cargo run -p cli -- 3v3 mage,warrior,mage warrior,mage,warrior
+cargo run -p cli -- mage,warrior,mage warrior,mage,warrior
 ```
 
 ## Test
