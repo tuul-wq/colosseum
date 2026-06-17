@@ -123,6 +123,7 @@ impl Formation {
             .iter_mut()
             .filter_map(Option::take)
             .collect::<Vec<_>>();
+
         let mut heroes = heroes.into_iter();
 
         for slot in &mut self.slots {
@@ -156,9 +157,9 @@ mod tests {
         let mid_hero_id = hero_id("Mid");
         let back_hero_id = hero_id("Back");
 
-        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&front_hero_id));
-        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&mid_hero_id));
-        assert_eq!(formation.hero_at(Position::BACKLINE), Some(&back_hero_id));
+        assert_eq!(formation.hero_at(Position::Frontline), Some(&front_hero_id));
+        assert_eq!(formation.hero_at(Position::Midline), Some(&mid_hero_id));
+        assert_eq!(formation.hero_at(Position::Backline), Some(&back_hero_id));
     }
 
     #[test]
@@ -170,16 +171,16 @@ mod tests {
         formation
             .remove(&old_back_hero_id)
             .expect("back hero removal should succeed");
-        let result = formation.place(&new_back_hero_id, Position::BACKLINE);
+        let result = formation.place(&new_back_hero_id, Position::Backline);
 
         assert!(result.is_ok());
         assert_eq!(
-            formation.hero_at(Position::BACKLINE),
+            formation.hero_at(Position::Backline),
             Some(&new_back_hero_id)
         );
         assert_eq!(
             formation.position_of(&new_back_hero_id),
-            Some(Position::BACKLINE)
+            Some(Position::Backline)
         );
     }
 
@@ -189,10 +190,10 @@ mod tests {
         let first_hero_id = hero_id("Front");
         let second_hero_id = hero_id("Second");
 
-        let result = formation.place(&second_hero_id, Position::FRONTLINE);
+        let result = formation.place(&second_hero_id, Position::Frontline);
 
         assert!(matches!(result, Err(WorldError::PositionOccupied)));
-        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&first_hero_id));
+        assert_eq!(formation.hero_at(Position::Frontline), Some(&first_hero_id));
         assert_eq!(formation.position_of(&second_hero_id), None);
     }
 
@@ -201,11 +202,11 @@ mod tests {
         let mut formation = formation();
         let hero_id = hero_id("Front");
 
-        let result = formation.place(&hero_id, Position::BACKLINE);
+        let result = formation.place(&hero_id, Position::Backline);
 
         assert!(matches!(result, Err(WorldError::PositionOccupied)));
-        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&hero_id));
-        assert_eq!(formation.position_of(&hero_id), Some(Position::FRONTLINE));
+        assert_eq!(formation.hero_at(Position::Frontline), Some(&hero_id));
+        assert_eq!(formation.position_of(&hero_id), Some(Position::Frontline));
     }
 
     #[test]
@@ -218,9 +219,9 @@ mod tests {
         let result = formation.remove(&front_hero_id);
 
         assert!(result.is_ok());
-        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&mid_hero_id));
-        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&back_hero_id));
-        assert_eq!(formation.hero_at(Position::BACKLINE), None);
+        assert_eq!(formation.hero_at(Position::Frontline), Some(&mid_hero_id));
+        assert_eq!(formation.hero_at(Position::Midline), Some(&back_hero_id));
+        assert_eq!(formation.hero_at(Position::Backline), None);
         assert_eq!(formation.position_of(&front_hero_id), None);
     }
 
@@ -243,14 +244,14 @@ mod tests {
         formation
             .remove(&back_hero_id)
             .expect("back hero removal should succeed");
-        let result = formation.move_to(&mid_hero_id, Position::BACKLINE);
+        let result = formation.move_to(&mid_hero_id, Position::Backline);
 
         assert!(result.is_ok());
-        assert_eq!(formation.hero_at(Position::MIDLINE), None);
-        assert_eq!(formation.hero_at(Position::BACKLINE), Some(&mid_hero_id));
+        assert_eq!(formation.hero_at(Position::Midline), None);
+        assert_eq!(formation.hero_at(Position::Backline), Some(&mid_hero_id));
         assert_eq!(
             formation.position_of(&mid_hero_id),
-            Some(Position::BACKLINE)
+            Some(Position::Backline)
         );
     }
 
@@ -259,11 +260,11 @@ mod tests {
         let mut formation = formation();
         let hero_id = hero_id("Front");
 
-        let result = formation.move_to(&hero_id, Position::FRONTLINE);
+        let result = formation.move_to(&hero_id, Position::Frontline);
 
         assert!(result.is_ok());
-        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&hero_id));
-        assert_eq!(formation.position_of(&hero_id), Some(Position::FRONTLINE));
+        assert_eq!(formation.hero_at(Position::Frontline), Some(&hero_id));
+        assert_eq!(formation.position_of(&hero_id), Some(Position::Frontline));
     }
 
     #[test]
@@ -272,11 +273,11 @@ mod tests {
         let first_hero_id = hero_id("Front");
         let second_hero_id = hero_id("Mid");
 
-        let result = formation.move_to(&first_hero_id, Position::MIDLINE);
+        let result = formation.move_to(&first_hero_id, Position::Midline);
 
         assert!(matches!(result, Err(WorldError::PositionOccupied)));
-        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&first_hero_id));
-        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&second_hero_id));
+        assert_eq!(formation.hero_at(Position::Frontline), Some(&first_hero_id));
+        assert_eq!(formation.hero_at(Position::Midline), Some(&second_hero_id));
     }
 
     #[test]
@@ -285,10 +286,10 @@ mod tests {
         let missing_hero_id = hero_id("Missing");
         let front_hero_id = hero_id("Front");
 
-        let result = formation.move_to(&missing_hero_id, Position::FRONTLINE);
+        let result = formation.move_to(&missing_hero_id, Position::Frontline);
 
         assert!(matches!(result, Err(WorldError::HeroNotFound)));
-        assert_eq!(formation.hero_at(Position::FRONTLINE), Some(&front_hero_id));
+        assert_eq!(formation.hero_at(Position::Frontline), Some(&front_hero_id));
     }
 
     #[test]
@@ -301,17 +302,17 @@ mod tests {
 
         assert!(result.is_ok());
         assert_eq!(
-            formation.hero_at(Position::FRONTLINE),
+            formation.hero_at(Position::Frontline),
             Some(&second_hero_id)
         );
-        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&first_hero_id));
+        assert_eq!(formation.hero_at(Position::Midline), Some(&first_hero_id));
         assert_eq!(
             formation.position_of(&first_hero_id),
-            Some(Position::MIDLINE)
+            Some(Position::Midline)
         );
         assert_eq!(
             formation.position_of(&second_hero_id),
-            Some(Position::FRONTLINE)
+            Some(Position::Frontline)
         );
     }
 
@@ -324,7 +325,7 @@ mod tests {
         let result = formation.swap_with(&missing_hero_id, &present_hero_id);
 
         assert!(matches!(result, Err(WorldError::HeroNotFound)));
-        assert_eq!(formation.hero_at(Position::MIDLINE), Some(&present_hero_id));
+        assert_eq!(formation.hero_at(Position::Midline), Some(&present_hero_id));
         assert_eq!(formation.position_of(&missing_hero_id), None);
     }
 
@@ -338,7 +339,7 @@ mod tests {
 
         assert!(matches!(result, Err(WorldError::HeroNotFound)));
         assert_eq!(
-            formation.hero_at(Position::FRONTLINE),
+            formation.hero_at(Position::Frontline),
             Some(&present_hero_id)
         );
         assert_eq!(formation.position_of(&missing_hero_id), None);

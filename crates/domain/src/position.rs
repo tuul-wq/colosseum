@@ -11,10 +11,6 @@ impl Position {
     /// Amount of positions per side
     pub const COUNT: usize = 3;
 
-    pub const FRONTLINE: Self = Self::Frontline;
-    pub const MIDLINE: Self = Self::Midline;
-    pub const BACKLINE: Self = Self::Backline;
-
     pub fn index(self) -> usize {
         match self {
             Self::Frontline => 0,
@@ -34,16 +30,16 @@ impl Position {
 
     /// Returns Frontline and Midline positions.
     pub fn front() -> HashSet<Self> {
-        HashSet::from([Self::FRONTLINE, Self::MIDLINE])
+        HashSet::from([Self::Frontline, Self::Midline])
     }
 
     /// Returns Midline position.
     pub fn mid() -> HashSet<Self> {
-        HashSet::from([Self::MIDLINE])
+        HashSet::from([Self::Midline])
     }
 
     /// Returns Midline and Backline positions.
     pub fn back() -> HashSet<Self> {
-        HashSet::from([Self::MIDLINE, Self::BACKLINE])
+        HashSet::from([Self::Midline, Self::Backline])
     }
 }

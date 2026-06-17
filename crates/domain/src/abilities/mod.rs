@@ -61,7 +61,7 @@ pub enum AbilityTarget {
 pub enum AbilityEffect {
     Damage(u8),
     Heal(u8),
-    DamageReduction { amount: u8, duration_turns: u8 },
+    // DamageReduction { amount: u8, duration_turns: u8 },
     // Buff,
     // Debuff,
 }

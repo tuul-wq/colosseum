@@ -21,6 +21,8 @@ impl Arena {
             heroes: arena_lineup.all_heroes(),
         }
     }
+
+    pub fn start() {}
 }
 
 #[cfg(test)]
@@ -39,11 +41,11 @@ mod tests {
 
         let left_frontline = arena
             .world
-            .hero_at(Side::Left, Position::FRONTLINE)
+            .hero_at(Side::Left, Position::Frontline)
             .expect("left frontline hero should exist");
         let right_midline = arena
             .world
-            .hero_at(Side::Right, Position::MIDLINE)
+            .hero_at(Side::Right, Position::Midline)
             .expect("right midline hero should exist");
 
         assert!(matches!(
@@ -66,7 +68,7 @@ mod tests {
 
         let left_backline = arena
             .world
-            .hero_at(Side::Left, Position::BACKLINE)
+            .hero_at(Side::Left, Position::Backline)
             .expect("left backline hero should exist");
 
         assert!(matches!(

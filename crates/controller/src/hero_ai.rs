@@ -6,7 +6,7 @@ use world::{Side, World};
 const INVALID_ACTION_SCORE: i32 = -1_000_000;
 
 const POSITION_ORDER: [Position; Position::COUNT] =
-    [Position::FRONTLINE, Position::MIDLINE, Position::BACKLINE];
+    [Position::Frontline, Position::Midline, Position::Backline];
 
 const ABILITY_ORDER: [AbilityId; 6] = [
     AbilityId::Fireball,
@@ -25,22 +25,6 @@ pub struct DecisionContext<'a> {
 }
 
 impl<'a> DecisionContext<'a> {
-    pub fn get_allies(&self, side: Side) -> HashMap<HeroId, &'a Hero> {
-        self.world
-            .all_heroes(side)
-            .into_iter()
-            .filter_map(|id| self.targets.get(id).map(|&hero| (id.clone(), hero)))
-            .collect()
-    }
-
-    pub fn get_enemies(&self, side: Side) -> HashMap<HeroId, &'a Hero> {
-        self.world
-            .all_heroes(Side::other_side(side))
-            .into_iter()
-            .filter_map(|id| self.targets.get(id).map(|&hero| (id.clone(), hero)))
-            .collect()
-    }
-
     pub fn actor_position(&self) -> Option<Position> {
         self.world.position_of(self.side, &self.actor.id)
     }
@@ -392,14 +376,6 @@ impl ScoringAi {
                 .filter_map(|hero_id| ctx.hero(hero_id))
                 .map(|target| self.score_heal(target, *heal))
                 .sum(),
-            AbilityEffect::DamageReduction {
-                amount,
-                duration_turns,
-            } => target_ids
-                .iter()
-                .filter_map(|hero_id| ctx.hero(hero_id))
-                .map(|target| self.score_damage_reduction(target, *amount, *duration_turns))
-                .sum(),
         }
     }
 
@@ -432,20 +408,6 @@ impl ScoringAi {
 
         if is_critical_health(target) && effective_heal > 0 {
             score += self.weights.critical_health_bonus;
-        }
-
-        score
-    }
-
-    fn score_damage_reduction(&self, target: &Hero, amount: u8, duration_turns: u8) -> i32 {
-        if !target.is_alive() {
-            return 0;
-        }
-
-        let mut score = amount as i32 * duration_turns as i32 * 5;
-
-        if is_critical_health(target) {
-            score += self.weights.critical_health_bonus / 2;
         }
 
         score
@@ -657,10 +619,10 @@ fn is_critical_health(hero: &Hero) -> bool {
 fn is_adjacent_position(from: Position, to: Position) -> bool {
     matches!(
         (from, to),
-        (Position::FRONTLINE, Position::MIDLINE)
-            | (Position::MIDLINE, Position::FRONTLINE)
-            | (Position::MIDLINE, Position::BACKLINE)
-            | (Position::BACKLINE, Position::MIDLINE)
+        (Position::Frontline, Position::Midline)
+            | (Position::Midline, Position::Frontline)
+            | (Position::Midline, Position::Backline)
+            | (Position::Backline, Position::Midline)
     )
 }
 
@@ -723,13 +685,13 @@ mod tests {
 
         weak_enemy.take_damage(95);
         world
-            .place(Side::Left, &actor.id, Position::BACKLINE)
+            .place(Side::Left, &actor.id, Position::Backline)
             .expect("actor placement should succeed");
         world
-            .place(Side::Right, &healthy_enemy.id, Position::FRONTLINE)
+            .place(Side::Right, &healthy_enemy.id, Position::Frontline)
             .expect("healthy enemy placement should succeed");
         world
-            .place(Side::Right, &weak_enemy.id, Position::BACKLINE)
+            .place(Side::Right, &weak_enemy.id, Position::Backline)
             .expect("weak enemy placement should succeed");
 
         let ctx = context(
@@ -757,7 +719,7 @@ mod tests {
 
         actor.take_damage(80);
         world
-            .place(Side::Left, &actor.id, Position::FRONTLINE)
+            .place(Side::Left, &actor.id, Position::Frontline)
             .expect("actor placement should succeed");
 
         let ctx = context(&actor, &world, Side::Left, vec![&actor]);
@@ -774,10 +736,10 @@ mod tests {
         let mut world = empty_world();
 
         world
-            .place(Side::Left, &actor.id, Position::FRONTLINE)
+            .place(Side::Left, &actor.id, Position::Frontline)
             .expect("actor placement should succeed");
         world
-            .place(Side::Right, &enemy.id, Position::FRONTLINE)
+            .place(Side::Right, &enemy.id, Position::Frontline)
             .expect("enemy placement should succeed");
 
         let ctx = context(&actor, &world, Side::Left, vec![&actor, &enemy]);
@@ -787,7 +749,7 @@ mod tests {
         assert_eq!(
             action,
             TurnAction::Move {
-                to: Position::MIDLINE,
+                to: Position::Midline,
             }
         );
     }
